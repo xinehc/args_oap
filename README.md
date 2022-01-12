@@ -13,7 +13,7 @@ a. download packages from here (http://www.htslib.org/download/)
 b. install samtools 
 c. copy executable "samtools" into the subfoler "bin" under "ARGs_OAP_v2.3.2" 
 
-2. minimap2  
+2. minimap2 
 a. download packages from here (https://github.com/lh3/minimap2) 
 b. install minimap2 
 c. copy executable "mimimap2" into the subfoler "bin" under "ARGs_OAP_v2.3.2" 
