@@ -7,12 +7,6 @@ remove bbmap thus we can treat single end reads
 
 Installation
 ============================  
-+  Conda
-```bash
-conda create -n my_conda_name -c xiaole99 -c bioconda args_oap=2.3.2 python=3.7
-conda activate my_conda_name
-```
-
 +  build from source 
 ```bash
 git clone https://github.com/xiaole99/ARGs_OAP
