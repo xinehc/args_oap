@@ -52,7 +52,7 @@ The **extracted.fa** and **meta_data_online.txt** are two files needed for stage
 The meta-data-online.txt looks like this   
   
 SampleID | Name | Category | ReadLength |#ofreads | #of16S| **#ofCell**  
----------|------|-----------|----------|-------|----|----   
+---------|------|----------|----------|-------|----|----   
  1       | STAS | ST  | 100| 200000 | 10.1  |   4.9  
  2       | SWHAS104 | SWH | 100|200000 | 9.7 |    4.1  
   
