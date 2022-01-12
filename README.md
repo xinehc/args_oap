@@ -8,9 +8,9 @@ remove bbmap thus we can treat single end reads
 
 Prepare compulsory command
 ============================
-1. samtools 
-a. download packages from here (http://www.htslib.org/download/) 
-b. install samtools 
+1. samtools  
+a. download packages from here (http://www.htslib.org/download/)   
+b. install samtools  
 c. copy executable "samtools" into the subfoler "bin" under "ARGs_OAP_v2.3.2" 
 
 2. minimap2 
