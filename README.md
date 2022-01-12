@@ -2,7 +2,7 @@ ARGs_OAP v2.3.2 manual
 ==========================================
 
 The change log of this version (2022.01.12) includes:
-1. pipeline modification
+1. pipeline modification  
 remove bbmap thus we can treat single end reads
 
 
