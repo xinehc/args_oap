@@ -32,10 +32,10 @@ Example of meta-data file **meta-data.txt**  Tips:
    
 **Please make sure the meta-data file is pure txt format, if you edit the file under windows, using notepad++ and check the end of each line by cliking View-> Show Symbol -> Show All Characters. If the line is end up with CRLF, please remove the CR by replace \r to nothing in the replace dialogue frame**  
   
-SampleID | Name | Category |ReadLength  
----------|------|-----------  
- 1       | STAS | ST       |100  
- 2       | SWHAS104 | SWH  |100  
+|SampleID | Name | Category |ReadLength  
+|---------|------|-----------  
+| 1       | STAS | ST       |100  
+| 2       | SWHAS104 | SWH  |100  
   
 Stage one  
 ==================  
@@ -51,10 +51,10 @@ The **extracted.fa** and **meta_data_online.txt** are two files needed for stage
   
 The meta-data-online.txt looks like this   
   
-SampleID | Name | Category | ReadLength |#ofreads | #of16S| **#ofCell**  
----------|------|----------|----------|-------|----|----   
- 1       | STAS | ST  | 100| 200000 | 10.1  |   4.9  
- 2       | SWHAS104 | SWH | 100|200000 | 9.7 |    4.1  
+|SampleID | Name | Category | ReadLength |#ofreads | #of16S| **#ofCell**  
+|---------|------|----------|----------|-------|----|----   
+| 1       | STAS | ST  | 100| 200000 | 10.1  |   4.9  
+| 2       | SWHAS104 | SWH | 100|200000 | 9.7 |    4.1  
   
   
 Stage two  
