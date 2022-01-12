@@ -60,7 +60,8 @@ SampleID | Name | Category | ReadLength |#ofreads | #of16S| **#ofCell**
 Stage two  
 ========================================================  
 Normally, juse run  
-    perl ./stage_two_version2 -i extracted.fa -m meta_data_online.txt -o testout -l 25 -d 80 -e 1e-5  
+
+    ./stage_two_version2 -i extracted.fa -m meta_data_online.txt -o testout -l 25 -d 80 -e 1e-5  
   
 For users have very big data and prefer complex running:  
 1. users run locally by themselves to get the blastx outfmt 6 format resutls by alighment against SARG2.2.  
