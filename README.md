@@ -11,18 +11,14 @@ Installation
 ```bash
 conda create -n my_conda_name -c xiaole99 -c bioconda args_oap=2.3.2 python=3.7
 conda activate my_conda_name
-
+```
 
 +  build from source 
-
-
+```bash
 git clone https://github.com/xiaole99/ARGs_OAP
-cd ARGs_OAP
-
-  
-  
-Prepare compulsory command  
-============================  
+cd ARGs_OAP_v2.3.2
+```  
+then need to prepare compulsory command  
 1. samtools  
 a. download packages from here (http://www.htslib.org/download/)  
 b. install samtools  
@@ -34,8 +30,7 @@ b. install minimap2
 c. copy executable "mimimap2" into the subfoler "bin" under "ARGs_OAP_v2.3.2"  
   
   
-  
-Prepare the meta-data file of your samples    
+Before Usage -- Prepare the meta-data file of your samples    
 ==========================================  
 To run the stage one pipeline, users need to prepare relative meta-data.txt file and put all the pair-end fastq file into one directory    
 Example of meta-data file **meta-data.txt**  Tips:     
