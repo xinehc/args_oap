@@ -32,9 +32,11 @@ Example of meta-data file **meta-data.txt**  Tips:
    
 **Please make sure the meta-data file is pure txt format, if you edit the file under windows, using notepad++ and check the end of each line by cliking View-> Show Symbol -> Show All Characters. If the line is end up with CRLF, please remove the CR by replace \r to nothing in the replace dialogue frame**  
 
+The meta-data.txt looks like this 
+
 
 SampleID | Name | Category |ReadLength  
----------|------|-----------  
+---------|------|-------|----  
  1       | STAS | ST       |100  
  2       | SWHAS104 | SWH  |100  
   
