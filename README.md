@@ -1,111 +1,38 @@
-ARGs_OAP v2.3.2 manual    
-==========================================  
-  
-The change log of this version (2022.01.12) includes:  
-1. pipeline modification  
-remove bbmap thus we can treat single end reads  
+# args_oap_for_conda
+Source code of package `args_oap`
 
-Installation
-============================  
-+  build from source 
+## installation
++ via conda (only available for `linux-64, python=3.7`)
+
 ```bash
-git clone https://github.com/xiaole99/ARGs_OAP
-cd ARGs_OAP_v2.3.2
-```  
-then need to prepare compulsory command  
-1. samtools  
-a. download packages from here (http://www.htslib.org/download/)  
-b. install samtools  
-c. copy executable "samtools" into the subfoler "bin" under "ARGs_OAP_v2.3.2"  
-  
-3. minimap2  
-a. download packages from here (https://github.com/lh3/minimap2)  
-b. install minimap2  
-c. copy executable "mimimap2" into the subfoler "bin" under "ARGs_OAP_v2.3.2"  
-  
-  
-Before Usage -- Prepare the meta-data file of your samples    
-==========================================  
-To run the stage one pipeline, users need to prepare relative meta-data.txt file and put all the pair-end fastq file into one directory    
-Example of meta-data file **meta-data.txt**  Tips:     
-* You need keep the first and second column's name as SampleID and Name  
-* The SampleID are required to be unique numbers counting from 1 to 2 to 3 etc.  
-* Category is the classification of your samples into groups and we will colored your samples in PcoA by this informaton  
-* The meta-data table should be separated by tabular for each of the items   
-* The Name of each sample should be the fastq file names for your pair-end Illumina sequencing data, your fastq files will automatically be recognized by Name_1.fq and Name_2.fq, so you need to keep the name consistent with your fq file name. (if you files are end with .fastq or .fasta, you need to change them to end with .fq or .fa)  
-   
-**Please make sure the meta-data file is pure txt format, if you edit the file under windows, using notepad++ and check the end of each line by cliking View-> Show Symbol -> Show All Characters. If the line is end up with CRLF, please remove the CR by replace \r to nothing in the replace dialogue frame**  
+conda install -c bioconda -c xiaole99 args_oap=2.3.7
+```
+please note that at this moment only python=3.7 is support, if python!=3.7, you may want to create a new conda environment:
+    
+```bash
+conda create -n args_oap -c xiaole99 -c bioconda args_oap=2.3.7 python=3.7
+source activate args_oap
+```
 
-The meta-data.txt looks like this 
++ via source
 
+args_oap depends on `diamond>=0.9.24`, `minimap2`, `fastp`, `bbmap`, `samtools`, `blast`. If your system has all the dependencies, then:
+```bash
+git clone -b test https://github.com/xiaole99/args_oap_for_conda
+cd args_oap_for_conda
+python setup.py install # use python3 if needed
+```
 
-SampleID | Name | Category |ReadLength  
----------|------|-------|----  
- 1       | STAS | ST       |100  
- 2       | SWHAS104 | SWH  |100  
-  
-Stage one  
-==================  
-Put all your fastq files into one directory in your local system (notice the name of your fastq files should be Name_1.fq and Name_2.fq). your can give -h to show the help information. Examples could be found in source directory example, in example directory run test:     
-  
-./stage_one_version2.3.2 -i inputfqs -o testoutdir -m meta-data.txt -n 8  
-  
-    ./stage_one_version2.3.2  -h  
-  
-The results are in testoutdir/  
-  
-The **extracted.fa** and **meta_data_online.txt** are two files needed for stage_two analysis.     
-  
-The meta-data-online.txt looks like this   
+## example
+Two toy examples (100k paired-end reads, 100bp each) are provided in `example/inputdir`:
 
+```bash
+# git clone -b test https://github.com/xiaole99/args_oap_for_conda
+# cd args_oap_for_conda
 
-SampleID | Name | Category | ReadLength |#ofreads | #of16S| **#ofCell**  
----------|------|----------|----------|-------|----|----   
- 1       | STAS | ST  | 100| 200000 | 10.1  |   4.9  
- 2       | SWHAS104 | SWH | 100|200000 | 9.7 |    4.1  
-  
-  
-Stage two  
-========================================================  
-Normally, juse run  
+args_oap stage_one -i example/inputfqs -m example/meta-data.txt -o example/output -f 'fa' -n 8
+args_oap stage_two -i example/output/extracted.fa -m example/output/meta_data_online.txt -o example/output -n 8
+```
 
-    ./stage_two_version2 -i extracted.fa -m meta_data_online.txt -o testout -l 25 -d 80 -e 1e-5  
-  
-For users have very big data and prefer complex running:  
-1. users run locally by themselves to get the blastx outfmt 6 format resutls by alighment against SARG2.2.  
-**A typical scene is that users can paralelly run the blastx on clusters by multi-nodes, and then merge the blastx output as the input for the -b option.**  
-2. Prerequest   
-    a. download the whole fold of this repo.      
-    b. install R packages **vegan, labdsv, ggplot2 and scales**  (Enter R and use install.packages(pkgs="vegan") to install these packages).  
-3. use -b option for the stage two script:   
-perl ./stage_two_version2 -i extracted.fa -m meta_data_online.txt -o testout -b merge_blastx.out.txt  
-  
-Stage two pipeline on Galaxy system and download results  
-========================================================  
-Go to http://smile.hku.hk/SARGs  and using the module ARG_OAP.    
-  
-1. Using **ARG_OAP** -> **Upload Files** module to upload the extracted fasta file and meta_data_online.txt file generated in stage one into Galaxy    
-2. Click **ARG_OAP** and **Ublast_stagetwo**, select your uploaded files    
-3. For \"Column in Metadata:\" chose the column you want to classify your samples (default: 3)  
-  
-Click **Execute** and you can find four output files for your information  
-  
-After a while or so, you will notice that their are four files generated for your information.    
-   
-**File 1 and 2**: PcoA figures of your samples and other environment samples generated by ARGs abundance matrix normalization to 16s reads number and cell number    
-**File 3 and 4**: Other tabular mother tables which including the profile of ARGs type and sub type information, as long as with other environment samples mother table. File3 results of ARGs abundance normalization aganist 16S reads number; File 4 results of ARGs abundance normalization aganist cell number  
-  
-  
-  
-There are some questions raised by users, please refer to the [FAQ](https://github.com/biofuture/Ublastx_stageone/wiki/FAQ) for details.  To run ARG OAP locally, users should download the source code into local computer system (Unix/Linux). Users can upload the generated files for stage two onto our Galaxy analysis platform (http://smile.hku.hk/SARGs) or use the local version of stage two script.   
-  
-------------------------------------------------------------------------------------------------------------------------    
-**Notice:**  
-  
-This tools only provide the required scripts for ARGs-OAP1.0/2.0 pipeline  
-  
-This pipeline is distributed in the hope to achieve the aim of management of antibiotic resistant genes in envrionment, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.This pipeline is only allowed to be used for non-commercial and academic purpose.  
-  
-**The SARG database is distributed only freely used for academic prupose, any commercial use should require the agreement from the developer team.**   
-  
-  
+## todo: need to modify the path in the original perl files, otherwise cannot run
+Now the perl files use the binaries in the `bin` folder, need to change the path e.g. `./bin/diamond -> diamond` in future updates
