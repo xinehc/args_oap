@@ -12,13 +12,13 @@ The change log of this version (2022.01.12) includes:
 
 ```bash
 conda install -c bioconda -c xiaole99 args_oap=2.3.7
-conda install -c bioconda -c hkuenvbio args_oap=2.4
+#conda install -c bioconda -c hkuenvbio args_oap=2.4
 ```
 please note that at this moment only python=3.7 is support, if python!=3.7, you may want to create a new conda environment:
     
 ```bash
 conda create -n args_oap -c xiaole99 -c bioconda args_oap=2.3.7 python=3.7
-conda create -n args_oap -c hkuenvbio -c bioconda args_oap=2.4 python=3.7
+#conda create -n args_oap -c hkuenvbio -c bioconda args_oap=2.4 python=3.7
 source activate args_oap
 ```
 
