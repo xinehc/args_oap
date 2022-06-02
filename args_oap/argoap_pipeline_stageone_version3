@@ -1,10 +1,11 @@
 #!/usr/bin/perl -w
 use strict;
 
-## This programme generate scripts to  ARGs-OAP stage one  for all the metagenomics fastq files 
-## in one input directory.
-## Modified at Jan. 11th, 2022
-## Version 2.4
+##This programme generate scripts to  ARGs-OAP stage one  for all the metagenomics fastq files 
+##in one input directory.
+##Author: Xiaole Yin - 20220105
+##Email: biofurue.jiang@gmail.com
+##version 3.0
 
 use Getopt::Std;
 use File::Basename;
@@ -21,11 +22,7 @@ BEGIN {
 
 our ($opt_h, $opt_i, $opt_o, $opt_n, $opt_m, $opt_f, $opt_z, $opt_x, $opt_y, $opt_v, $opt_q) = "";
 my  $usage = <<USE;
-	Author: JIANG Xiaotao
-	Date: 12-11-2014
-	Version : 2.4
-	Modified : 01-11-2022
-	$0 -i <Fq input dir> -m <Metadata_map.txt> -o <output dir> -n [number of threads] -f [fa|fq] -z -h -c [S|U]
+	$0 -i <Fq input dir> -m <Metadata_map.txt> -o <output dir> -n [number of threads] -f [fa|fq] -z -h
 
 	-i Input files directory, required
 	-m meta data file, required
@@ -66,12 +63,16 @@ my $date = localtime;
 open(LOG, ">$logF") || die "Can not create Log.txt\n";
 print LOG "Start Ublastx one : $date\n";
 #$opt_c
-my $ARDB_PATH ||= "$ublastxdir/DB/SARG.2.2.diamondv0.9.24.dmnd"; ##change to the new one
+# my $ARDB_PATH ||= "$ublastxdir/DB/SARG_20210607.diamondv0.9.24.dmnd"; ##change to the new one
+my $ARDB_PATH ||= "$ublastxdir/DB/SARG_20210519.fasta.dmnd"; ##change to the new one
 my $opt_d ||= $ARDB_PATH; ## This option is to replace the version of database, such as new and old SARG database, or other heirachical database with similar format 
-my $ggnr85 ||= "$ublastxdir/DB/gg85_yinxiaole.fasta";
+# my $ggnr85 ||= "$ublastxdir/DB/gg85_yinxiaole.fasta.mmi";
+my $ggnr85 ||= "$ublastxdir/DB/gg85.fasta";
+my $ggnr85blast ||= "$ublastxdir/DB/gg85.fasta";
 
 ##Adding database files for copy number corrction for -c U
-my $KO30DMD ||= "$ublastxdir/DB/KO30_DIAMOND.dmnd";
+# my $KO30DMD ||= "$ublastxdir/DB/KO30_DIAMOND.dmnd";
+my $KO30DMD ||= "$ublastxdir/DB/ko30.fa.dmnd";
 my $genekolist ||="$ublastxdir/DB/all_KO30_name.list";
 
 
@@ -135,7 +136,7 @@ for my $fq (sort {$a <=> $b } keys %samples){
 			if($opt_q){
 				my $fo1 = "$opt_i/$samples{$fq}.fastp.1.fq";
 				my $fo2 = "$opt_i/$samples{$fq}.fastp.2.fq";
-				print BASH "$ublastxdir/bin/fastp -i $f1 -I $f2 -o $fo1 -O $fo2 -w $opt_n -j $opt_i/$samples{$fq}.jason -h $opt_i/$samples{$fq}.html\n";
+				print BASH "fastp -i $f1 -I $f2 -o $fo1 -O $fo2 -w $opt_n -j $opt_i/$samples{$fq}.jason -h $opt_i/$samples{$fq}.html\n";
 				$f1 = $fo1;
 				$f2 = $fo2;
 				
@@ -150,7 +151,7 @@ for my $fq (sort {$a <=> $b } keys %samples){
 			if($opt_q){
 				my $fo1 = "$opt_i/$samples{$fq}.fastp.1.fq";
 				my $fo2 = "$opt_i/$samples{$fq}.fastp.2.fq";
-				print BASH "$ublastxdir/bin/fastp -i $f1 -I $f2 -o $fo1 -O $fo2 -w $opt_n -j $opt_i/$samples{$fq}.jason -h $opt_i/$samples{$fq}.html\n";
+				print BASH "fastp -i $f1 -I $f2 -o $fo1 -O $fo2 -w $opt_n -j $opt_i/$samples{$fq}.jason -h $opt_i/$samples{$fq}.html\n";
 				$f1 = $fo1;
 				$f2 = $fo2;
 				
@@ -178,10 +179,16 @@ for my $fq (sort {$a <=> $b } keys %samples){
 	}##Fq->fa
 
 
+
+
 	my $uso1 = "$opt_o/$samples{$fq}_1.us";
 	my $uso2 = "$opt_o/$samples{$fq}_2.us";
-	my $us161 = "$opt_o/$samples{$fq}_1.sam";
-	my $us162 = "$opt_o/$samples{$fq}_2.sam";
+	# my $us161 = "$opt_o/$samples{$fq}_1.sam";
+	# my $us162 = "$opt_o/$samples{$fq}_2.sam";
+ 	my $us161 = "$opt_o/$samples{$fq}.16s_1.fa";
+    my $us162 = "$opt_o/$samples{$fq}.16s_2.fa";
+    my $us161blast = "$opt_o/$samples{$fq}.16s_1.blast";
+    my $us162blast = "$opt_o/$samples{$fq}.16s_2.blast";
 	#my $f1fixed = "$opt_o/$samples{$fq}_fixed_1.fa";
 	#my $f2fixed = "$opt_o/$samples{$fq}_fixed_2.fa";
 	#my $sing = "$opt_o/$samples{$fq}_singletons.fa";
@@ -189,17 +196,22 @@ for my $fq (sort {$a <=> $b } keys %samples){
 
 	##do usearch against ARDB to extract potential ARG reads
     #print BASH "$ublastxdir/bin/usearchv8 -ublast $f1 -db $opt_d -evalue 1e-5 -accel 0.5 -blast6out $uso1 -threads $opt_n -maxaccepts 1\n";
-    print BASH "$ublastxdir/bin/diamondv0.9.24 blastx -d $opt_d -q $f1 -o $uso1 -e 10 -p $opt_n -k 1 --id 60 --query-cover 15\n";
+    print BASH "diamond blastx -d $opt_d -q $f1 -o $uso1 -e 10 -p $opt_n -k 1 --id 60 --query-cover 15\n";
     #print BASH "$ublastxdir/bin/usearchv8 -ublast $f2 -db $opt_d -evalue 1e-5 -accel 0.5 -blast6out $uso2 -threads $opt_n -maxaccepts 1\n\n";
-    print BASH "$ublastxdir/bin/diamondv0.9.24 blastx -d $opt_d -q $f2 -o $uso2 -e 10 -p $opt_n -k 1 --id 60 --query-cover 15\n";
+    print BASH "diamond blastx -d $opt_d -q $f2 -o $uso2 -e 10 -p $opt_n -k 1 --id 60 --query-cover 15\n";
         
     ##do usearch against greengene nr90 database to calculate 16S copies number
     #print BASH "$ublastxdir/bin/usearchv8 -ublast $f1 -db $ggnr85 -evalue $eval1 -accel 0.5 -blast6out $us16s1 -threads $opt_n -strand both  -maxaccepts 1\n";
     #print BASH "$ublastxdir/bin/usearchv8 -ublast $f2 -db $ggnr85 -evalue $eval1 -accel 0.5 -blast6out $us16s2 -threads $opt_n -strand both  -maxaccepts 1\n\n";
-    # print BASH "$ublastxdir/bin/bbmap/repair.sh in1=$f1 in2=$f2 out1=$f1fixed out2=$f2fixed outs=$sing repair\n";
-    # print BASH "$ublastxdir/bin/minimap2 -ax sr $ggnr85 $f1fixed $f2fixed >$us16\n";
-    print BASH "$ublastxdir/bin/minimap2 -ax sr $ggnr85 $f1 >$us161\n";
-    print BASH "$ublastxdir/bin/minimap2 -ax sr $ggnr85 $f2 >$us162\n";
+    #print BASH "$ublastxdir/bin/bbmap/repair.sh in1=$f1 in2=$f2 out1=$f1fixed out2=$f2fixed outs=$sing repair\n";
+    print BASH "bwa mem -t $opt_n $ggnr85 $f1 | samtools fasta -F4 -F0x900 - > $us161\n";
+    print BASH "bwa mem -t $opt_n $ggnr85 $f2 | samtools fasta -F4 -F0x900 - > $us162\n";
+
+    print BASH "blastn -max_target_seqs 1 -db $ggnr85blast -query $us161 -out $us161blast -evalue $eval1 -outfmt '6 qseqid' -num_threads $opt_n\n";
+    print BASH "blastn -max_target_seqs 1 -db $ggnr85blast -query $us162 -out $us162blast -evalue $eval1 -outfmt '6 qseqid' -num_threads $opt_n\n";
+    # print BASH "minimap2 -ax sr $ggnr85 $f1 >$us161\n";
+    # print BASH "minimap2 -ax sr $ggnr85 $f2 >$us162\n";
+    
 
 
 	##extract potential reads for each sample
@@ -217,8 +229,8 @@ for my $fq (sort {$a <=> $b } keys %samples){
 	my $dmout = "$opt_o/$samples{$fq}.uscmg.blastx.txt";
 	
 	print BASH "\n#Using Diamond to search USCMGs\n";
-	print BASH "$ublastxdir/bin/diamond blastx -q $f1 -d $KO30DMD -o $dmd1out -f tab  -p $opt_n -e $eval2  --id $did --max-target-seqs 1\n";		
-	print BASH "$ublastxdir/bin/diamond blastx -q $f2 -d $KO30DMD -o $dmd2out -f tab  -p $opt_n  -e $eval2 --id $did --max-target-seqs 1\n";		
+	print BASH "diamond blastx -q $f1 -d $KO30DMD -o $dmd1out -f tab  -p $opt_n -e $eval2  --id $did --max-target-seqs 1\n";		
+	print BASH "diamond blastx -q $f2 -d $KO30DMD -o $dmd2out -f tab  -p $opt_n  -e $eval2 --id $did --max-target-seqs 1\n";		
 	print BASH "cat $dmd1out $dmd2out > $dmout\n"
 			
 
@@ -241,7 +253,7 @@ my $metaout = "$opt_o/meta_data_online.txt";
 my $extractfa = "$opt_o/extracted.fa";
 #option -c do copy number correction
 
-print BASH "$ublastxdir/bin/merge_extracted_fa_update_metadate.v2.3.2.pl $opt_i $opt_o $opt_m $metaout $extractfa U $genekolist\n";
+print BASH "$ublastxdir/bin/merge_extracted_fa_update_metadate.v2.3.pl $opt_i $opt_o $opt_m $metaout $extractfa U $genekolist\n";
 
 close BASH;
 
