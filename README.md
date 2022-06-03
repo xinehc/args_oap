@@ -65,7 +65,7 @@ After `stagetwo`, the normalized ARGs copies per 16s/cells or hits/reads will be
 | sulfonamide    | 0.011830148152227792 | 0.056019782667944225  |
 | tetracycline   | 0.004097610108964381 | 0.04088706547697995   |
 
-###  Prepare the meta-data.txt file
+###  (mandatory) Prepare the meta-data.txt file
 (We hope to remove the manual meta-data.txt preparation step in future updates)
 
 To run the stage one pipeline, you need to 
