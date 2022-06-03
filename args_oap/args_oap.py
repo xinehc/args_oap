@@ -38,7 +38,7 @@ def parse_options(argv):
     mandatory_two.add_argument('-m', help='meta data online from stage one', required=True)
 
     optional_two = parser_stage_two.add_argument_group('OPTIONAL')
-    optional_two.add_argument('-n', help='lnumber of threads used for blastx, default 1', default=1)
+    optional_two.add_argument('-n', help='number of threads used for blastx, default 1', default=1)
     optional_two.add_argument('-b', help='if set then process the blastx results directly [default off], useful if user want to accelerate the stage two by running blastx paralell', default=False)
     optional_two.add_argument('-l', help='length filtering default 75 percent', default=75)
     optional_two.add_argument('-e', help='evalue cutoff, default 1e-7', default=1e-7)

@@ -64,7 +64,7 @@ print ("\
 ------------------------------------------------------------------------\n\
 This pipeline is designed to process multisamples ARG identification, this is the part two pipeline\n\
 perl $0 <Extracted_fasta> <Meta_data_info> <Catergory> <lenth> <e-value> <identity> <institution name> <email address> <Taskname> <PDF16s> <PDFCELL> <TABLE1> <TABLE2> <TABLE3>\n\
-Authur: Xiaole Yin\n\
+Author: Xiaole Yin\n\
 Copyright: Prof. Tong Zhang, The University of Hong Kong\n\
 Email: yinlele99@gmail.com\n\
 Citation: \n\

@@ -9,7 +9,7 @@ setup(
     license='MIT',
     description='ARGs-OAP: Online Analysis Pipeline for Anti-biotic Resistance Genes Detection from Meta-genomic Data Using an Integrated Structured ARG-database',
     author='Xiaole Yin',
-    author_email='xiaole99@gmail.com',
+    author_email='yinlele99@gmail.com',
     packages=find_packages(),
     classifiers=[
         'Intended Audience :: Developers',

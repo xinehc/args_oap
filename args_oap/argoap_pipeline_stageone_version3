@@ -72,7 +72,7 @@ my $ggnr85blast ||= "$ublastxdir/DB/gg85.fasta";
 
 ##Adding database files for copy number corrction for -c U
 # my $KO30DMD ||= "$ublastxdir/DB/KO30_DIAMOND.dmnd";
-my $KO30DMD ||= "$ublastxdir/DB/ko30.fa.dmnd";
+my $KO30DMD ||= "$ublastxdir/DB/all_KO30.fasta.dmnd";
 my $genekolist ||="$ublastxdir/DB/all_KO30_name.list";
 
 
