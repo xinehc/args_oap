@@ -1,64 +1,81 @@
-# ARGs_OAP v2.4 manual 
-Here posted the source code of package `args_oap` + its usage info 
+# ARGs_OAP v3.0 (beta)
+This repository was created by Xiaole Yin (_xiaole99_) and is currently maintained by Xi Chen (_xinhec_). The goal is to make args_oap more user-friendly. 
+
+If you have any questions, please contact Xiaole Yin ([yinlele99@gmail.com](yinlele99@gmail.com)).
 
 ## Changes
-The change log of this version (2022.01.12) includes:  
-1. pipeline modification  
-   We removed bbmap thus we can treat single end reads.  
-
+The change log of this version (June, 2022) includes:
++ We updated the SARG database and the corresponding structure file to version 3.0 ([SARG v3.0-M](https://smile.hku.hk/pipeline/#/Indexing/download)) .
++ We dropped bbmap and usearch from the pipeline, now args_oap support both linux and osx.
++ We modified the 16s estimation process by changing minimap2 to bwa + blastn, as minimap2 does not work well for reads that are super short (e.g. below 100 bp, see [https://github.com/lh3/minimap2/issues/363#issuecomment-473387994](https://github.com/lh3/minimap2/issues/363#issuecomment-473387994))
++ We fixed the version of diamond to 0.9.24, as the latest version of diamond (2.0.15) will gives ~10% more hits of USCMGs and ARGs. The sensitivity of the newer version of diamond is under evaluation. We hope to remove this constrain in future updates.
++ Fixed some bugs.
 
 ## Installation
-+ via conda (only available for `linux-64, python=3.7`)
-
+Conda (osx-64/linux-64):
 ```bash
-conda install -c bioconda -c xiaole99 args_oap=2.3.7
-#conda install -c bioconda -c hkuenvbio args_oap=2.4
-```
-please note that at this moment only python=3.7 is support, if python!=3.7, you may want to create a new conda environment:
-    
-```bash
-conda create -n args_oap -c xiaole99 -c bioconda args_oap=2.3.7 python=3.7
-#conda create -n args_oap -c hkuenvbio -c bioconda args_oap=2.4 python=3.7
-source activate args_oap
+conda install -c bioconda -c conda-forge xinehc::args_oap
 ```
 
-+ via source
-
-args_oap depends on `diamond>=0.9.24`, `minimap2`, `fastp`, `samtools`, `blast`. If your system has all the dependencies, then:
+We'd suggest to create a new conda environment (here use `-n args_oap` as an example) to avoid potential conflicts of dependencies:
 ```bash
-git clone -b test https://github.com/xiaole99/args_oap_for_conda
-cd args_oap_for_conda
-git clone -b test https://github.com/xiaole99/args_oap
-cd args_oap
+conda create -n args_oap -c bioconda -c conda-forge xinehc::args_oap
+conda activate args_oap
+```
+
+Args_oap depends on `python>=3.7`, `diamond==0.9.24`, `bwa>=0.7.17`, `blast>=2.12`, `samtools>=1.15`, `pandas`, `fastp>=0.23.2`. If your OS has all the dependencies, then it can be built from source:
+```bash
+git clone https://github.com/xinehc/ARGs_OAP.git
+cd ARGs_OAP
 python setup.py install # use python3 if needed
 ```
+**Please note that currently only the 0.9.24 version of diamond is supported, we hope to remove this constrain in future updates.**
 
-## Usage 
-Two toy examples (100k paired-end reads, 100bp each) are provided in `example/inputdir`:
+## Example
+Two examples (100k paired-end reads, 100 bp each) can be found [here](https://dl.dropboxusercontent.com/s/054ufvfahchfk7f/example.tar.gz). The zipped file can be downloaded using `wget`:
 
 ```bash
-# git clone -b test https://github.com/xiaole99/args_oap_for_conda
-# cd args_oap_for_conda
-# git clone -b test https://github.com/xiaole99/args_oap
-# cd args_oap
+wget https://dl.dropboxusercontent.com/s/054ufvfahchfk7f/example.tar.gz
+tar -xvf example.tar.gz
+cd example
 
-args_oap stage_one -i example/inputfqs -m example/meta-data.txt -o example/output -f 'fa' -n 8
-args_oap stage_two -i example/output/extracted.fa -m example/output/meta_data_online.txt -o example/output -n 8
+args_oap stage_one -i inputfqs -m meta-data.txt -o output -f fa -n 8
+args_oap stage_two -i output/extracted.fa -m output/meta_data_online.txt -o output/output -n 8
 ```
-The example result are in testoutdir/  
 
-### todo: need to modify the path in the original perl files, otherwise cannot run
-Now the perl files use the binaries in the `bin` folder, need to change the path e.g. `./bin/diamond -> diamond` in future updates
+After `stage_one`, a `meta_data_online.txt` file can be found in `output`. It summarizes the 16s and cell numbers of each samples, for example:
 
-###  Before run the above command, need to prepare the meta-data file of your samples
-To run the stage one pipeline, users need to 
+| SampleID | Name     | Category | ReadLength | #ofReads | #of16Sreads      | CellNumber       |
+|----------|----------|----------|------------|----------|------------------|------------------|
+| 1        | STAS     | ST       | 100        | 200000   | 9.35754189944134 | 3.12517959454616 |
+| 2        | SWHAS104 | SWH      | 100        | 200000   | 8.5195530726257  | 3.51551445460891 |
+
+After `stagetwo`, the normalized ARGs copies per 16s/cells or hits/reads will be shown in several `*_normalized_*.txt` files. For example, `output.normalize_16s.type` means:
++ **normalized_16s** - normalized against 16s rRNA copies
++ **type** - Type of ARGs (the hierarchy in SARG is type -> subtype -> gene)
+
+| Type           | STAS                 | SWHAS104              |
+|----------------|----------------------|-----------------------|
+| MLS            | 0.0                  | 0.006280321819611637  |
+| aminoglycoside | 0.014248756218905473 | 0.05689225096549162   |
+| bacitracin     | 0.012526379093543273 | 0.02387830588588363   |
+| beta-lactam    | 0.0                  | 0.06118010268499747   |
+| mupirocin      | 0.002609025186567164 | 0.0037497024423531647 |
+| quinolone      | 0.1272415290809021   | 0.036200398345334756  |
+| sulfonamide    | 0.011830148152227792 | 0.056019782667944225  |
+| tetracycline   | 0.004097610108964381 | 0.04088706547697995   |
+
+###  (mandatory) Prepare the meta-data.txt file
+(We hope to remove the manual meta-data.txt preparation step in future updates)
+
+To run the stage one pipeline, you need to 
 1. Put all your paired-end fastq/fasta files into one directory (notice that the name of your fastq files should be Name_1.fq and Name_2.fq).  
 2. Prepare relative meta-data.txt file.  
 
 Tips:     
 * You need keep the first and second column's name as SampleID and Name  
 * The SampleID are required to be unique numbers counting from 1 to 2 to 3 etc.  
-* Category is the classification of your samples into groups and we will colored your samples in PcoA by this informaton  
+* Category is the classification of your samples into groups and we will colored your samples in PcoA by this information (online stagetwo version only, see below)
 * The meta-data table should be separated by tabular for each of the items   
 * The Name of each sample should be the fastq file names for your pair-end Illumina sequencing data, your fastq files will automatically be recognized by Name_1.fq and Name_2.fq, so you need to keep the name consistent with your fq file name. (if you files are end with .fastq or .fasta, you need to change them to end with .fq or .fa)  
    
@@ -70,22 +87,16 @@ SampleID | Name | Category |ReadLength
 ---------|------|-------|----  
  1       | STAS | ST       |100  
  2       | SWHAS104 | SWH  |100  
-  
-
 
 ### (optional) For very big data to run stage two  
 For users have very big data and prefer complex running:  
 1. users run locally by themselves to get the blastx outfmt 6 format resutls by alighment against SARG2.2.  
 **A typical scene is that users can paralelly run the blastx on clusters by multi-nodes, and then merge the blastx output as the input for the -b option.**  
-2. Prerequest   
-    a. download the whole fold of this repo.      
-    b. install R packages **vegan, labdsv, ggplot2 and scales**  (Enter R and use install.packages(pkgs="vegan") to install these packages).  
-3. use -b option for the stage two script:   
+2. use -b option for the stage two script:   
 
+```bash
+args_oap stage_two -i extracted.fa -m meta_data_online.txt -o output -b merge_blastx.out.txt  
 ```
-args_oap stage_two -i extracted.fa -m meta_data_online.txt -o testout -b merge_blastx.out.txt  
-```
-
 
 ### (optional) Stage two pipeline on Galaxy system and download results  
 Go to http://smile.hku.hk/SARGs  and using the module ARG_OAP.    
@@ -99,12 +110,10 @@ Click **Execute** and you can find four output files for your information
 After a while or so, you will notice that their are four files generated for your information.    
    
 **File 1 and 2**: PcoA figures of your samples and other environment samples generated by ARGs abundance matrix normalization to 16s reads number and cell number    
-**File 3 and 4**: Other tabular mother tables which including the profile of ARGs type and sub type information, as long as with other environment samples mother table. File3 results of ARGs abundance normalization aganist 16S reads number; File 4 results of ARGs abundance normalization aganist cell number  
+**File 3 and 4**: Other tabular mother tables which including the profile of ARGs type and sub type information, as long as with other environment samples mother table. File3 results of ARGs abundance normalization against 16S reads number; File 4 results of ARGs abundance normalization against cell number  
   
-  
-  
-There are some questions raised by users, please refer to the [FAQ](https://github.com/biofuture/Ublastx_stageone/wiki/FAQ) for details.  To run ARG OAP locally, users should download the source code into local computer system (Unix/Linux). Users can upload the generated files for stage two onto our Galaxy analysis platform (http://smile.hku.hk/SARGs) or use the local version of stage two script.   
-  
+There are some questions raised by users, please refer to the [FAQ](https://github.com/biofuture/Ublastx_stageone/wiki/FAQ) for details. To run ARG OAP locally, users should download the source code into local computer system (Unix/Linux). Users can upload the generated files for stage two onto our Galaxy analysis platform (http://smile.hku.hk/SARGs) or use the local version of stage two script.   
+
 ---    
 **Notice:**  
   

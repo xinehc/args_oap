@@ -1,3 +1,0 @@
-SampleID	Name	Category	ReadLength
-1	STAS	ST	100
-2	SWHAS104	SWH	100	
