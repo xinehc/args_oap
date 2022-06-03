@@ -1,5 +1,5 @@
 # ARGs_OAP v3.0 (beta)
-This repository was created by Xiaole Yin (_xiaole99_) and is currently maintained by Xi Chen (_xinhec_). The goal is to make args_oap more user-friendly. 
+This repository was created by Xiaole Yin (_xiaole99_) and is currently maintained by Xi Chen (_xinhec_). The goal is to make args_oap faster, and easier to run. 
 
 If you have any questions, please contact Xiaole Yin ([yinlele99@gmail.com](yinlele99@gmail.com)).
 
@@ -7,9 +7,11 @@ If you have any questions, please contact Xiaole Yin ([yinlele99@gmail.com](yinl
 The change log of this version (June, 2022) includes:
 + We updated the SARG database and the corresponding structure file to version 3.0 ([SARG v3.0-M](https://smile.hku.hk/pipeline/#/Indexing/download)) .
 + We dropped bbmap and usearch from the pipeline, now args_oap support both linux and osx.
-+ We modified the 16s estimation process by changing minimap2 to bwa + blastn, as minimap2 does not work well for reads that are super short (e.g. below 100 bp, see [https://github.com/lh3/minimap2/issues/363#issuecomment-473387994](https://github.com/lh3/minimap2/issues/363#issuecomment-473387994))
++ We modified the 16s estimation process by changing minimap2 to bwa + blastn, as minimap2 does not work well for reads that are super short (e.g. below 100 bp, see [https://github.com/lh3/minimap2/issues/363#issuecomment-473387994](https://github.com/lh3/minimap2/issues/363#issuecomment-473387994)).
 + We fixed the version of diamond to 0.9.24 (and python to 3.7.\*), as the latest version of diamond (2.0.15) will gives ~10% more hits of USCMGs and ARGs. The sensitivity of the newer version of diamond is under evaluation. We hope to remove this constrain in future updates.
-+ Fixed some bugs.
++ Bug fixed:
+    + Fixed a bug that caused the worst hits (instead of the best) out of five being picked in stagetwo's blastn.
+    + Fixed a bug that caused some ARGs being ignored in stagetwo.
 
 ## Installation
 Conda (osx-64/linux-64):
