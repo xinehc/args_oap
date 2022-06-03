@@ -8,7 +8,7 @@ The change log of this version (June, 2022) includes:
 + We updated the SARG database and the corresponding structure file to version 3.0 ([SARG v3.0-M](https://smile.hku.hk/pipeline/#/Indexing/download)) .
 + We dropped bbmap and usearch from the pipeline, now args_oap support both linux and osx.
 + We modified the 16s estimation process by changing minimap2 to bwa + blastn, as minimap2 does not work well for reads that are super short (e.g. below 100 bp, see [https://github.com/lh3/minimap2/issues/363#issuecomment-473387994](https://github.com/lh3/minimap2/issues/363#issuecomment-473387994))
-+ We fixed the version of diamond to 0.9.24, as the latest version of diamond (2.0.15) will gives ~10% more hits of USCMGs and ARGs. The sensitivity of the newer version of diamond is under evaluation. We hope to remove this constrain in future updates.
++ We fixed the version of diamond to 0.9.24 (and python to 3.7.\*), as the latest version of diamond (2.0.15) will gives ~10% more hits of USCMGs and ARGs. The sensitivity of the newer version of diamond is under evaluation. We hope to remove this constrain in future updates.
 + Fixed some bugs.
 
 ## Installation
@@ -23,7 +23,7 @@ conda create -n args_oap -c bioconda -c conda-forge xinehc::args_oap
 conda activate args_oap
 ```
 
-Args_oap depends on `python>=3.7`, `diamond==0.9.24`, `bwa>=0.7.17`, `blast>=2.12`, `samtools>=1.15`, `pandas`, `fastp>=0.23.2`. If your OS has all the dependencies, then it can be built from source:
+Args_oap depends on `python==3.7`, `diamond==0.9.24`, `bwa>=0.7.17`, `blast>=2.12`, `samtools>=1.15`, `fastp>=0.23.2`, `pandas`. If your OS has all the dependencies, then it can be built from source:
 ```bash
 git clone https://github.com/xinehc/ARGs_OAP.git
 cd ARGs_OAP
@@ -35,6 +35,7 @@ python setup.py install # use python3 if needed
 Two examples (100k paired-end reads, 100 bp each) can be found [here](https://dl.dropboxusercontent.com/s/054ufvfahchfk7f/example.tar.gz). The zipped file can be downloaded using `wget`:
 
 ```bash
+# conda install wget
 wget https://dl.dropboxusercontent.com/s/054ufvfahchfk7f/example.tar.gz
 tar -xvf example.tar.gz
 cd example
