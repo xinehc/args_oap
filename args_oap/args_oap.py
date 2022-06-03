@@ -54,7 +54,7 @@ def parse_options(argv):
 
     if len(argv) < 2:
         parser.print_help()
-        sys.exit(2)
+        sys.exit(0)
 
     if len(argv) < 3:
         if argv[1] == 'stage_one':
@@ -63,7 +63,7 @@ def parse_options(argv):
             parser_stage_two.print_help()
         else:
             parser.print_help()
-        sys.exit(2)
+        sys.exit(0)
 
     return(parser.parse_args(argv[1:]))
 
