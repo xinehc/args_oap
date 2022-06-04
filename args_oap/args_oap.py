@@ -23,10 +23,10 @@ def parse_options(argv):
     optional_one.add_argument('-n', help='number of threads, default 1', default=1)
     optional_one.add_argument('-f', help='the format of processed files, default fq', default='fq')
     optional_one.add_argument('-q', help='quality control of fastq sequences defualt not take effect, set to 1, then will do QC with fastp', default=0)
-    optional_one.add_argument('-z', help='whether the fq files were .gz format, if -z, then firstly gzip -d, default(none) ', default=False, action='store_true')
+    optional_one.add_argument('-z', help='whether the fq files were .gz format, if 1, then firstly gzip -d, default 0', default=0)
     optional_one.add_argument('-x', help='evalue for searching 16S in usearch default 1e-10', default=1e-10)
     optional_one.add_argument('-y', help='evalue for searching universal single copy marker gene default 3', default=3)
-    optional_one.add_argument('-v', help='the identity value for diamond to search the USCMGs default  0.45', default=0.45)
+    optional_one.add_argument('-v', help='the identity value for diamond to search the USCMGs default 45', default=45)
 
     parser_stage_one.set_defaults(func=stage_one)
 
