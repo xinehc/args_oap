@@ -14,11 +14,10 @@ def stage_one(options):
     '-n', str(options.n),
     '-f', options.f,
     '-q', str(options.q),
+    '-z', str(options.z),
     '-x', str(options.x),
     '-y', str(options.y),
     '-v', str(options.v)]
 
-    if options.z:
-        args.extend(['-z'])
-
     subprocess.call(args)
+    

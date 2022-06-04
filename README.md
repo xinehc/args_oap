@@ -10,9 +10,10 @@ The change log of this version (June, 2022) includes:
 + We modified the 16s estimation process by changing minimap2 to bwa + blastn, as minimap2 does not work well for reads that are super short (e.g. below 100 bp, see [https://github.com/lh3/minimap2/issues/363#issuecomment-473387994](https://github.com/lh3/minimap2/issues/363#issuecomment-473387994)).
 + We fixed the version of diamond to 0.9.24 (and python to 3.7.\*), as the latest version of diamond (2.0.15) will gives ~10% more hits of USCMGs and ARGs. The sensitivity of the newer version of diamond is under evaluation. We hope to remove this constrain in future updates.
 + Bug fixed:
-    + Fixed a bug that caused the worst hits (instead of the best) out of five being picked in stagetwo's blastn.
-    + Fixed a bug in stageone caused USCMG being slightly overestimated.
-    + Fixed a bug in stagetwo that caused some multi-component ARGs hits being ignored.
+    + Fixed a bug that caused the worst hits (instead of the best) being picked in stagetwo's blastx when multiple candidates of ARGs can be found.
+    + Fixed a bug that caused some multi-component ARGs hits being uncounted in stagetwo's aggregation process.
+    + Fixed a bug in stageone that caused USCMG being slightly overestimated.
+    + Fixed a bug in stageone that caused parameters -x -y -v being ignored.
 
 ## Installation
 Conda (osx-64/linux-64):

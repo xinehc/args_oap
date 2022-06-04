@@ -39,7 +39,7 @@ USE
 
 #Get all the input parameters
 
-getopts('i:o:n:f:m:x:y:v:hzq');
+getopts('i:o:m:n:f:q:z:x:y:v:h');
 if($opt_h  ||  ($opt_i eq "") ){
 	die "$usage\n";
 }
@@ -47,16 +47,17 @@ if($opt_h  ||  ($opt_i eq "") ){
 $opt_n ||= 1;
 $opt_f ||="fq";
 $opt_o ||= ".";
-unless(-d $opt_o){
-	`mkdir $opt_o`;
-}
-
 $opt_x ||= 1e-10;
 $opt_y ||= 3;
 $opt_v ||= 45;
+
 my $eval1 =$opt_x;
 my $eval2 =$opt_y;
 my $did = $opt_v; ##identity for diamond searching
+
+unless(-d $opt_o){
+	`mkdir $opt_o`;
+}
 
 my $logF = "$opt_o/Log.txt";
 my $date = localtime;
@@ -75,17 +76,12 @@ my $ggnr85blast ||= "$ublastxdir/DB/gg85.fasta";
 my $KO30DMD ||= "$ublastxdir/DB/all_KO30.fasta.dmnd";
 my $genekolist ||="$ublastxdir/DB/all_KO30_name.list";
 
-
 ##Get all the fastq in input dir
 ##Generate output script files for all fastq
 $date =~ s/\s+/-/g;
 
 my $o_sh = "$opt_o/ublastx_bash_$date.sh";
-unless(-d $opt_o){
-	`mkdir $opt_o`;
-}
 open(BASH, ">$o_sh") || die "output dir can not write:\n"; 
-
 my $count = 1;
 
 ##--------------------------------------------------------------------------------------------------------
