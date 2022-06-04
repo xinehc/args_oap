@@ -11,30 +11,31 @@ The change log of this version (June, 2022) includes:
 + We fixed the version of diamond to 0.9.24 (and python to 3.7.\*), as the latest version of diamond (2.0.15) will gives ~10% more hits of USCMGs and ARGs. The sensitivity of the newer version of diamond is under evaluation. We hope to remove this constrain in future updates.
 + Bug fixed:
     + Fixed a bug that caused the worst hits (instead of the best) out of five being picked in stagetwo's blastn.
-    + Fixed a bug that caused some ARGs being ignored in stagetwo.
+    + Fixed a bug in stageone caused USCMG being slightly overestimated.
+    + Fixed a bug in stagetwo that caused some multi-component ARGs hits being ignored.
 
 ## Installation
 Conda (osx-64/linux-64):
 ```bash
-conda install -c bioconda -c conda-forge xinehc::args_oap
+conda install -c bioconda -c conda-forge xinehc::args_oap=3.0
 ```
 
 We'd suggest to create a new conda environment (here use `-n args_oap` as an example) to avoid potential conflicts of dependencies:
 ```bash
-conda create -n args_oap -c bioconda -c conda-forge xinehc::args_oap
+conda create -n args_oap -c bioconda -c conda-forge xinehc::args_oap=3.0
 conda activate args_oap
 ```
 
 Args_oap depends on `python==3.7`, `diamond==0.9.24`, `bwa>=0.7.17`, `blast>=2.12`, `samtools>=1.15`, `fastp>=0.23.2`, `pandas`. If your OS has all the dependencies, then it can be built from source:
 ```bash
-git clone https://github.com/xinehc/ARGs_OAP.git
-cd ARGs_OAP
+git clone https://github.com/xinehc/args_oap.git
+cd args_oap
 python setup.py install # use python3 if needed
 ```
 **Please note that currently only the 0.9.24 version of diamond is supported, we hope to remove this constrain in future updates.**
 
 ## Example
-Two examples (100k paired-end reads, 100 bp each) can be found [here](https://dl.dropboxusercontent.com/s/054ufvfahchfk7f/example.tar.gz). The zipped file can be downloaded using `wget`:
+Two examples (100k paired-end reads, 100 bp each) can be found [here](https://dl.dropboxusercontent.com/s/054ufvfahchfk7f/example.tar.gz). The zipped file can be downloaded manually or using `wget`:
 
 ```bash
 # conda install wget
@@ -42,6 +43,7 @@ wget https://dl.dropboxusercontent.com/s/054ufvfahchfk7f/example.tar.gz
 tar -xvf example.tar.gz
 cd example
 
+# conda activate args_oap
 args_oap stage_one -i inputfqs -m meta-data.txt -o output -f fa -n 8
 args_oap stage_two -i output/extracted.fa -m output/meta_data_online.txt -o output/output -n 8
 ```
@@ -50,8 +52,8 @@ After `stage_one`, a `meta_data_online.txt` file can be found in `output`. It su
 
 | SampleID | Name     | Category | ReadLength | #ofReads | #of16Sreads      | CellNumber       |
 |----------|----------|----------|------------|----------|------------------|------------------|
-| 1        | STAS     | ST       | 100        | 200000   | 9.35754189944134 | 3.12517959454616 |
-| 2        | SWHAS104 | SWH      | 100        | 200000   | 8.5195530726257  | 3.51551445460891 |
+| 1        | STAS     | ST       | 100        | 200000   | 9.35754189944134 | 2.95276936764951 |
+| 2        | SWHAS104 | SWH      | 100        | 200000   | 8.5195530726257  | 3.30218758791575 |
 
 After `stagetwo`, the normalized ARGs copies per 16s/cells or hits/reads will be shown in several `*_normalized_*.txt` files. For example, `output.normalize_16s.type` means:
 + **normalized_16s** - normalized against 16s rRNA copies
