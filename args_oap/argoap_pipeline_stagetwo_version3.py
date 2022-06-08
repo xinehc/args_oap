@@ -108,7 +108,7 @@ struc3 = pd.read_csv(args.struc3,sep="\t")
 
 
 ### merge blast6out results with meta and SARG structure#########
-result1 = pd.merge(df, struc1, left_on='sseqid',right_on='Seq.ID',how='inner')
+result1 = pd.merge(df, struc1, left_on='sseqid',right_on='SARG.Seq.ID',how='inner')
 result1_type = result1.groupby(['qseqid_modi', 'Type'])[['ratio']].agg('sum')
 result1_subtype = result1.groupby(['qseqid_modi', 'Subtype'])[['ratio']].agg('sum')
 result1_gene = result1.groupby(['qseqid_modi', 'sseqid'])[['ratio']].agg('sum')
@@ -117,7 +117,7 @@ ppm1_type = result1.groupby(['qseqid_modi', 'Type'])[['count']].agg('sum')
 ppm1_subtype = result1.groupby(['qseqid_modi', 'Subtype'])[['count']].agg('sum')
 ppm1_gene = result1.groupby(['qseqid_modi', 'sseqid'])[['count']].agg('sum')
 
-result2 = pd.merge(df, struc2, left_on='sseqid',right_on='Seq.ID',how='inner')
+result2 = pd.merge(df, struc2, left_on='sseqid',right_on='SARG.Seq.ID',how='inner')
 result2['ratio_modifi']=result2['ratio']/3
 result2_type = result2.groupby(['qseqid_modi', 'Type'])[['ratio_modifi']].agg('sum')
 result2_subtype = result2.groupby(['qseqid_modi', 'Subtype'])[['ratio_modifi']].agg('sum')
@@ -127,7 +127,7 @@ ppm2_type = result2.groupby(['qseqid_modi', 'Type'])[['count']].agg('sum')
 ppm2_subtype = result2.groupby(['qseqid_modi', 'Subtype'])[['count']].agg('sum')
 ppm2_gene = result2.groupby(['qseqid_modi', 'sseqid'])[['count']].agg('sum')
 
-result3 = pd.merge(df, struc3, left_on='sseqid',right_on='Seq.ID',how='inner')
+result3 = pd.merge(df, struc3, left_on='sseqid',right_on='SARG.Seq.ID',how='inner')
 result3['ratio_modifi']=result3['ratio']/2
 result3_type = result3.groupby(['qseqid_modi', 'Type'])[['ratio_modifi']].agg('sum')
 result3_subtype = result3.groupby(['qseqid_modi', 'Subtype'])[['ratio_modifi']].agg('sum')

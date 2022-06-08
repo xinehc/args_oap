@@ -60,16 +60,17 @@ After `stagetwo`, the normalized ARGs copies per 16s/cells or hits/reads will be
 + **normalized_16s** - normalized against 16s rRNA copies
 + **type** - Type of ARGs (the hierarchy in SARG is type -> subtype -> gene)
 
-| Type           | STAS                 | SWHAS104              |
-|----------------|----------------------|-----------------------|
-| MLS            | 0.0                  | 0.006280321819611637  |
-| aminoglycoside | 0.014248756218905473 | 0.05689225096549162   |
-| bacitracin     | 0.012526379093543273 | 0.02387830588588363   |
-| beta-lactam    | 0.0                  | 0.06118010268499747   |
-| mupirocin      | 0.002609025186567164 | 0.0037497024423531647 |
-| quinolone      | 0.1272415290809021   | 0.036200398345334756  |
-| sulfonamide    | 0.011830148152227792 | 0.056019782667944225  |
-| tetracycline   | 0.004097610108964381 | 0.04088706547697995   |
+| Type                                | STAS                  | SWHAS104              |
+|-------------------------------------|-----------------------|-----------------------|
+| aminoglycoside                      | 0.014248756218905473  | 0.05778644603054001   |
+| bacitracin                          | 0.012526379093543273  | 0.02387830588588363   |
+| beta_lactam                         | 0.0                   | 0.06118010268499747   |
+| macrolide-lincosamide-streptogramin | 0.0017041336527240341 | 0.009842691110578379  |
+| multidrug                           | 0.004327798193369976  | 0.013092162368663536  |
+| mupirocin                           | 0.002609025186567164  | 0.0037497024423531647 |
+| quinolone                           | 0.1272415290809021    | 0.036200398345334756  |
+| sulfonamide                         | 0.011830148152227792  | 0.056019782667944225  |
+| tetracycline                        | 0.004097610108964381  | 0.04088706547697995   |
 
 ###  (mandatory) Prepare the meta-data.txt file
 (We hope to remove the manual meta-data.txt preparation step in future updates)
