@@ -1,4 +1,4 @@
-# ARGs_OAP v3.0 (beta)
+# ARGs_OAP v3.1 (beta)
 This repository was created by Xiaole Yin (_xiaole99_) and is currently maintained by Xi Chen (_xinhec_). The goal is to make args_oap faster, and easier to run. 
 
 If you have any questions, please contact Xiaole Yin ([yinlele99@gmail.com](yinlele99@gmail.com)).
