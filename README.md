@@ -116,7 +116,7 @@ There are some questions raised by users, please refer to the [FAQ](https://gith
 + Add a `mt_mode` switcher in stagetwo's blastx to make it faster when more than 5 cores are available.
 + Add a logger to make stagetwo's output more clear.
 
-#### Version 3.0 (04. June, 2022):
+#### Version 3.0 (04. June, 2022)
 + We updated the SARG database and the corresponding structure file to version 3.0 ([SARG v3.0-M](https://smile.hku.hk/pipeline/#/Indexing/download)) .
 + We dropped bbmap and usearch from the pipeline, now args_oap support both linux and osx.
 + We modified the 16s estimation process by changing minimap2 to bwa + blastn, as minimap2 does not work well for reads that are super short (e.g. below 100 bp, see [https://github.com/lh3/minimap2/issues/363#issuecomment-473387994](https://github.com/lh3/minimap2/issues/363#issuecomment-473387994)).
