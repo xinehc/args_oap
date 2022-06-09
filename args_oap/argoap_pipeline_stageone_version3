@@ -20,7 +20,7 @@ BEGIN {
 }
 
 
-our ($opt_h, $opt_i, $opt_o, $opt_n, $opt_m, $opt_f, $opt_z, $opt_x, $opt_y, $opt_v, $opt_q) = "";
+our ($opt_h, $opt_i, $opt_o, $opt_n, $opt_m, $opt_f, $opt_z, $opt_x, $opt_y, $opt_v, $opt_w, $opt_q) = "";
 my  $usage = <<USE;
 	$0 -i <Fq input dir> -m <Metadata_map.txt> -o <output dir> -n [number of threads] -f [fa|fq] -z -h
 
@@ -33,13 +33,14 @@ my  $usage = <<USE;
 	-z whether the fq files were .gz format, if -z, then firstly gzip -d, default (none) 
 	-x evalue for searching 16S in usearch default 1e-10
 	-y evalue for searching universal single copy marker gene default 3
-	-v the identity value for diamond to search the USCMGs default 45
+	-v the identity value for diamond to search the USCMGs default 40
+	-w the query cover value for diamond to search the USCMGs default 65
 	-h print this help information
 USE
 
 #Get all the input parameters
 
-getopts('i:o:m:n:f:q:z:x:y:v:h');
+getopts('i:o:m:n:f:q:z:x:y:v:w:h');
 if($opt_h  ||  ($opt_i eq "") ){
 	die "$usage\n";
 }
@@ -49,7 +50,8 @@ $opt_f ||="fq";
 $opt_o ||= ".";
 $opt_x ||= 1e-10;
 $opt_y ||= 3;
-$opt_v ||= 45;
+$opt_v ||= 40;
+$opt_w ||= 65;
 
 my $eval1 =$opt_x;
 my $eval2 =$opt_y;
@@ -225,8 +227,8 @@ for my $fq (sort {$a <=> $b } keys %samples){
 	my $dmout = "$opt_o/$samples{$fq}.uscmg.blastx.txt";
 	
 	print BASH "\n#Using Diamond to search USCMGs\n";
-	print BASH "diamond blastx -q $f1 -d $KO30DMD -o $dmd1out -f tab  -p $opt_n -e $eval2 --id $did --max-target-seqs 1\n";		
-	print BASH "diamond blastx -q $f2 -d $KO30DMD -o $dmd2out -f tab  -p $opt_n -e $eval2 --id $did --max-target-seqs 1\n";		
+	print BASH "diamond blastx -q $f1 -d $KO30DMD -o $dmd1out -f tab  -p $opt_n -e $eval2 --id $did --query-cover $opt_w --max-target-seqs 1\n";		
+	print BASH "diamond blastx -q $f2 -d $KO30DMD -o $dmd2out -f tab  -p $opt_n -e $eval2 --id $did --query-cover $opt_w --max-target-seqs 1\n";		
 	print BASH "cat $dmd1out $dmd2out > $dmout\n"
 			
 
