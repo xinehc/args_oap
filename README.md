@@ -3,18 +3,6 @@ This repository was created by Xiaole Yin (_xiaole99_) and is currently maintain
 
 If you have any questions, please contact Xiaole Yin ([yinlele99@gmail.com](yinlele99@gmail.com)).
 
-## Changes
-The change log of this version (June, 2022) includes:
-+ We updated the SARG database and the corresponding structure file to version 3.0 ([SARG v3.0-M](https://smile.hku.hk/pipeline/#/Indexing/download)) .
-+ We dropped bbmap and usearch from the pipeline, now args_oap support both linux and osx.
-+ We modified the 16s estimation process by changing minimap2 to bwa + blastn, as minimap2 does not work well for reads that are super short (e.g. below 100 bp, see [https://github.com/lh3/minimap2/issues/363#issuecomment-473387994](https://github.com/lh3/minimap2/issues/363#issuecomment-473387994)).
-+ We fixed the version of diamond to 0.9.24 (and python to 3.7.\*), as the latest version of diamond (2.0.15) will gives ~10% more hits of USCMGs and ARGs. The sensitivity of the newer version of diamond is under evaluation. We hope to remove this constrain in future updates.
-+ Bug fixed:
-    + Fixed a bug that caused the worst hits (instead of the best) being picked in stagetwo's blastx when multiple candidates of ARGs can be found.
-    + Fixed a bug that caused some multi-component ARGs hits being uncounted in stagetwo's aggregation process.
-    + Fixed a bug in stageone that caused USCMG being slightly overestimated.
-    + Fixed a bug in stageone that caused parameters -x -y -v being ignored.
-
 ## Installation
 Conda (osx-64/linux-64):
 ```bash
@@ -53,24 +41,24 @@ After `stage_one`, a `meta_data_online.txt` file can be found in `output`. It su
 
 | SampleID | Name     | Category | ReadLength | #ofReads | #of16Sreads      | CellNumber       |
 |----------|----------|----------|------------|----------|------------------|------------------|
-| 1        | STAS     | ST       | 100        | 200000   | 9.35754189944134 | 2.95276936764951 |
-| 2        | SWHAS104 | SWH      | 100        | 200000   | 8.5195530726257  | 3.30218758791575 |
+| 1        | STAS     | ST       | 100        | 200000   | 9.35754189944134 | 2.82910169634418 |
+| 2        | SWHAS104 | SWH      | 100        | 200000   | 8.5195530726257  | 3.16376328499407 |
 
 After `stagetwo`, the normalized ARGs copies per 16s/cells or hits/reads will be shown in several `*_normalized_*.txt` files. For example, `output.normalize_16s.type` means:
 + **normalized_16s** - normalized against 16s rRNA copies
 + **type** - Type of ARGs (the hierarchy in SARG is type -> subtype -> gene)
 
-| Type                                | STAS                  | SWHAS104              |
-|-------------------------------------|-----------------------|-----------------------|
-| aminoglycoside                      | 0.014248756218905473  | 0.05778644603054001   |
-| bacitracin                          | 0.012526379093543273  | 0.02387830588588363   |
-| beta_lactam                         | 0.0                   | 0.06118010268499747   |
-| macrolide-lincosamide-streptogramin | 0.0017041336527240341 | 0.009842691110578379  |
-| multidrug                           | 0.004327798193369976  | 0.013092162368663536  |
-| mupirocin                           | 0.002609025186567164  | 0.0037497024423531647 |
-| quinolone                           | 0.1272415290809021    | 0.036200398345334756  |
-| sulfonamide                         | 0.011830148152227792  | 0.056019782667944225  |
-| tetracycline                        | 0.004097610108964381  | 0.04088706547697995   |
+| Type                                | STAS                 | SWHAS104              |
+|-------------------------------------|----------------------|-----------------------|
+| aminoglycoside                      | 0.014248756218905473 | 0.05778644603054001   |
+| bacitracin                          | 0.012526379093543273 | 0.02387830588588363   |
+| beta_lactam                         | 0.0                  | 0.06118010268499747   |
+| macrolide-lincosamide-streptogramin | 0.0                  | 0.009842691110578379  |
+| multidrug                           | 0.004327798193369976 | 0.013092162368663536  |
+| mupirocin                           | 0.002609025186567164 | 0.0037497024423531647 |
+| quinolone                           | 0.1272415290809021   | 0.036200398345334756  |
+| sulfonamide                         | 0.011830148152227792 | 0.056019782667944225  |
+| tetracycline                        | 0.004097610108964381 | 0.04088706547697995   |
 
 ###  (mandatory) Prepare the meta-data.txt file
 (We hope to remove the manual meta-data.txt preparation step in future updates)
@@ -121,6 +109,25 @@ After a while or so, you will notice that their are four files generated for you
   
 There are some questions raised by users, please refer to the [FAQ](https://github.com/biofuture/Ublastx_stageone/wiki/FAQ) for details. To run ARG OAP locally, users should download the source code into local computer system (Unix/Linux). Users can upload the generated files for stage two onto our Galaxy analysis platform (http://smile.hku.hk/SARGs) or use the local version of stage two script.   
 
+
+## Changes log
+#### Version 3.1 (09. June, 2022)
++ Minor changes of the SARG database (now the v3.0-M database includes both multi-component and two-component ARGs).
++ Remove the constraint on diamond's version, add a new parameter `-w` and changed the default parameter of `-v` in stageone to compensate the changes.
++ Add a `mt_mode` switcher in stagetwo's blastx to make it faster when more than 5 cores are available.
++ Add a logger to make stagetwo's output more clear.
+
+#### Version 3.0 (04. June, 2022):
++ We updated the SARG database and the corresponding structure file to version 3.0 ([SARG v3.0-M](https://smile.hku.hk/pipeline/#/Indexing/download)) .
++ We dropped bbmap and usearch from the pipeline, now args_oap support both linux and osx.
++ We modified the 16s estimation process by changing minimap2 to bwa + blastn, as minimap2 does not work well for reads that are super short (e.g. below 100 bp, see [https://github.com/lh3/minimap2/issues/363#issuecomment-473387994](https://github.com/lh3/minimap2/issues/363#issuecomment-473387994)).
++ We fixed the version of diamond to 0.9.24 (and python to 3.7.\*), as the latest version of diamond (2.0.15) will gives ~10% more hits of USCMGs and ARGs. The sensitivity of the newer version of diamond is under evaluation. We hope to remove this constrain in future updates.
++ Bug fixed:
+    + Fixed a bug that caused the worst hits (instead of the best) being picked in stagetwo's blastx when multiple candidates of ARGs can be found.
+    + Fixed a bug that caused some multi-component ARGs hits being uncounted in stagetwo's aggregation process.
+    + Fixed a bug in stageone that caused USCMG being slightly overestimated.
+    + Fixed a bug in stageone that caused parameters -x -y -v being ignored.
+    
 ---    
 **Notice:**  
   
