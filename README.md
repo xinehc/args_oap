@@ -6,12 +6,12 @@ If you have any questions, please contact Xiaole Yin ([yinlele99@gmail.com](yinl
 ## Installation
 Conda (osx-64/linux-64):
 ```bash
-conda install -c bioconda -c conda-forge xinehc::args_oap=3.0
+conda install -c bioconda -c conda-forge xinehc::args_oap=3.1
 ```
 
 We'd suggest to create a new conda environment (here use `-n args_oap` as an example) to avoid potential conflicts of dependencies:
 ```bash
-conda create -n args_oap -c bioconda -c conda-forge xinehc::args_oap=3.0
+conda create -n args_oap -c bioconda -c conda-forge xinehc::args_oap=3.1
 conda activate args_oap
 ```
 
@@ -21,7 +21,6 @@ git clone https://github.com/xinehc/args_oap.git
 cd args_oap
 python setup.py install # use python3 if needed
 ```
-**Please note that currently only the 0.9.24 version of diamond is supported, we hope to remove this constrain in future updates.**
 
 ## Example
 Two examples (100k paired-end reads, 100 bp each) can be found [here](https://dl.dropboxusercontent.com/s/054ufvfahchfk7f/example.tar.gz). The zipped file can be downloaded manually or using `wget`:
