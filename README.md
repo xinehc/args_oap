@@ -15,7 +15,7 @@ conda create -n args_oap -c bioconda -c conda-forge xinehc::args_oap=3.0
 conda activate args_oap
 ```
 
-Args_oap depends on `python==3.7`, `diamond==0.9.24`, `bwa>=0.7.17`, `blast>=2.12`, `samtools>=1.15`, `fastp>=0.23.2`, `pandas`. If your OS has all the dependencies, then it can be built from source:
+Args_oap depends on `python>=3.7`, `diamond>=2.0.15`, `bwa>=0.7.17`, `blast>=2.12`, `samtools>=1.15`, `fastp>=0.23.2`, `pandas`. If your OS has all the dependencies, then it can be built from source:
 ```bash
 git clone https://github.com/xinehc/args_oap.git
 cd args_oap
@@ -126,8 +126,8 @@ There are some questions raised by users, please refer to the [FAQ](https://gith
     + Fixed a bug that caused the worst hits (instead of the best) being picked in stagetwo's blastx when multiple candidates of ARGs can be found.
     + Fixed a bug that caused some multi-component ARGs hits being uncounted in stagetwo's aggregation process.
     + Fixed a bug in stageone that caused USCMG being slightly overestimated.
-    + Fixed a bug in stageone that caused parameters -x -y -v being ignored.
-    
+    + Fixed a bug in stageone that caused parameters `-x` `-y` `-v` being ignored.
+
 ---    
 **Notice:**  
   
