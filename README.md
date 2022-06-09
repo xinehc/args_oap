@@ -120,12 +120,12 @@ There are some questions raised by users, please refer to the [FAQ](https://gith
 + We updated the SARG database and the corresponding structure file to version 3.0 ([SARG v3.0-M](https://smile.hku.hk/pipeline/#/Indexing/download)) .
 + We dropped bbmap and usearch from the pipeline, now args_oap support both linux and osx.
 + We modified the 16s estimation process by changing minimap2 to bwa + blastn, as minimap2 does not work well for reads that are super short (e.g. below 100 bp, see [https://github.com/lh3/minimap2/issues/363#issuecomment-473387994](https://github.com/lh3/minimap2/issues/363#issuecomment-473387994)).
-+ We fixed the version of diamond to 0.9.24 (and python to 3.7.\*), as the latest version of diamond (2.0.15) will gives ~10% more hits of USCMGs and ARGs. The sensitivity of the newer version of diamond is under evaluation. We hope to remove this constrain in future updates.
++ We fixed the version of diamond to 0.9.24 (and python to 3.7.\*), as the latest version of diamond (2.0.15) will give ~10% more hits of USCMGs. The sensitivity of the newer version of diamond is under evaluation. We hope to remove this constraint in future updates.
 + Bug fixed:
-    + Fixed a bug that caused the worst hits (instead of the best) being picked in stagetwo's blastx when multiple candidates of ARGs can be found.
-    + Fixed a bug that caused some multi-component ARGs hits being uncounted in stagetwo's aggregation process.
-    + Fixed a bug in stageone that caused USCMG being slightly overestimated.
-    + Fixed a bug in stageone that caused parameters `-x` `-y` `-v` being ignored.
+    + Fixed a bug that caused the worst hits (instead of the best) to be picked in stagetwo's blastx when multiple candidates of ARGs can be found.
+    + Fixed a bug that caused some multi-component ARGs hits to be uncounted in stagetwo's aggregation process.
+    + Fixed a bug in stageone that caused USCMG to be slightly overestimated.
+    + Fixed a bug in stageone that caused parameters `-x` `-y` `-v` to be ignored.
 
 ---    
 **Notice:**  
