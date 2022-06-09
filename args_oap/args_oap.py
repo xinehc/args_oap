@@ -26,7 +26,8 @@ def parse_options(argv):
     optional_one.add_argument('-z', help='whether the fq files were .gz format, if 1, then firstly gzip -d, default 0', default=0)
     optional_one.add_argument('-x', help='evalue for searching 16S in usearch default 1e-10', default=1e-10)
     optional_one.add_argument('-y', help='evalue for searching universal single copy marker gene default 3', default=3)
-    optional_one.add_argument('-v', help='the identity value for diamond to search the USCMGs default 45', default=45)
+    optional_one.add_argument('-v', help='the identity cutoff for diamond to search the USCMGs default 40', default=40)
+    optional_one.add_argument('-w', help='the query cover cutoff for diamond to search the USCMGs default 65', default=65)
 
     parser_stage_one.set_defaults(func=stage_one)
 
@@ -44,11 +45,10 @@ def parse_options(argv):
     optional_two.add_argument('-e', help='evalue cutoff, default 1e-7', default=1e-7)
     optional_two.add_argument('-d', help='identity cutoff, default 80', default=80)
 
-    optional_two.add_argument('-db', help='reference ARG database which is blastxable after makeblastdb, default is SARG database', default=workingdir+"/DB/SARG_20210519.fasta")
-    optional_two.add_argument('-fa', help='reference ARG database in fasta format, default is SARG database', default=workingdir+"/DB/SARG_20210519.fasta")
-    optional_two.add_argument('-struc1', help='reference ARG database structure, default is SARG database', default=workingdir+"/DB/structure_20210519_for_pipeline.txt")
-    optional_two.add_argument('-struc2', help='reference ARG database structure, default is SARG database', default=workingdir+"/DB/multi_component.txt")
-    optional_two.add_argument('-struc3', help='reference ARG database structure, default is SARG database', default=workingdir+"/DB/two_component.txt")
+    optional_two.add_argument('-db', help='reference ARG database which is blastxable after makeblastdb, default is SARG database', default=workingdir+"/DB/SARG.fasta")
+    optional_two.add_argument('-struc1', help='reference ARG database structure, default is SARG database', default=workingdir+"/DB/single-component_structure.txt")
+    optional_two.add_argument('-struc2', help='reference ARG database structure, default is SARG database', default=workingdir+"/DB/multi-component_structure.txt")
+    optional_two.add_argument('-struc3', help='reference ARG database structure, default is SARG database', default=workingdir+"/DB/two-component_structure.txt")
 
     parser_stage_two.set_defaults(func=stage_two)
 

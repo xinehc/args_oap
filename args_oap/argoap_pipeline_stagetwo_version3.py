@@ -1,8 +1,9 @@
 import os
 import argparse
 import pandas as pd
+import subprocess
 
-from datetime import datetime
+from utils import count_bp, logger
 
 ############################################ Arguments and declarations ##############################################
 workingdir = os.path.abspath(os.path.dirname(__file__))
@@ -36,15 +37,9 @@ parser.add_argument('-d',
 parser.add_argument("-b",
                     help="if set then process the blastx results directly [default off], useful if user want to accelerate the stage two by running blastx paralell",
                     type=str, metavar='extracted.out.tab',default="None")
-# parser.add_argument("-db",
-#                     help="reference ARG database which is blastxable after makeblastdb, default is SARG database",
-#                     type=str, default=workingdir+"/DB/SARG.3.fasta", metavar='SARG.3.fasta')
 parser.add_argument("-db",
                     help="reference ARG database which is blastxable after makeblastdb, default is SARG database",
-                    type=str, default=workingdir+"/DB/SARG_20210519.fasta", metavar='SARG_20210519.fasta')
-parser.add_argument("-fa",
-                    help="reference ARG database in fasta format, default is SARG database",
-                    type=str, default=workingdir+"/DB/SARG_20210519.fasta", metavar='SARG_20210519.fasta')
+                    type=str, default=workingdir+"/DB/SARG.fasta", metavar='SARG.fasta')
 parser.add_argument("-struc1",
                     help="reference ARG database structure, default is SARG database",
                     type=str, default=workingdir+"/DB/structure_20210519_for_pipeline.txt", metavar='structure_20210519_for_pipeline.txt')
@@ -77,23 +72,40 @@ structured ARG-database. Bioinformatics 2016. (optional: antibiotic resistance d
 ------------------------------------------------------------------------\n\
 ")
 
+_cols = ["qseqid","sseqid","pident","length","evalue","bitscore","slen","qlen"]
 blast6out = str(args.o)+ ".blastout.txt" 
 lenmatch = args.l / 100
 evaluematch = args.e 
 identitymatch =args.d
-begin = datetime.now().strftime("%H:%M:%S")
+
 if args.b != 'None':
     blast6out = args.b
 else:
-    os.system("blastx -query "+str(args.i)+" -out "+blast6out+" -db "+str(args.db)+" -evalue "+str(evaluematch)+" -num_threads "+str(args.n)+' -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore slen qlen" -max_target_seqs 5')
+    nbp, nseq = count_bp(args.i, ">")
+    mt_mode = "1" if nbp / int(args.n) >= 2500000 else "0"
+
+    logger.info("Extracting ARG sequences ({} reads, {} threads, mode {}), may take a while ...".format(nseq, args.n, mt_mode))
+    cmd = [
+        "blastx",
+        "-db", args.db, 
+        "-query", args.i, 
+        "-out", blast6out, 
+        "-outfmt", " ".join(["6"]+_cols),
+        "-max_target_seqs", "5",
+        "-evalue", str(evaluematch),
+        "-num_threads", str(args.n), 
+        "-mt_mode", mt_mode
+        ]
+    subprocess.run(cmd, check=True)
 
 ### process blast6out #######
-df = pd.read_csv(blast6out,sep="\t",header=None,names=["qseqid","sseqid","pident","length","mismatch","gapopen","qstart","qend","sstart","send","evalue","bitscore","slen","qlen"])
+logger.info("Merging files ...")
+df = pd.read_csv(blast6out, sep="\t", header=None, names=_cols)
 df = df[( df["pident"] >= identitymatch)  & ( df["evalue"] <= evaluematch)]
 df["ratio"] = df["length"] / df["slen"] 
 df["qratio"] = df["length"] * 3 / df["qlen"] 
 df = df[df["qratio"] >= lenmatch]
-df = df.sort_values(["qseqid","evalue","bitscore"], ascending=[True, True, False])
+df = df.sort_values(["qseqid", "evalue", "bitscore", "length"], ascending=[True, True, False, False])
 df = df.drop_duplicates(subset='qseqid', keep="first")
 df['qseqid_modi'] = df['qseqid'].str.rsplit('_', 1).str.get(0)
 
@@ -106,9 +118,8 @@ struc1 = pd.read_csv(args.struc1,sep="\t")
 struc2 = pd.read_csv(args.struc2,sep="\t")
 struc3 = pd.read_csv(args.struc3,sep="\t")
 
-
 ### merge blast6out results with meta and SARG structure#########
-result1 = pd.merge(df, struc1, left_on='sseqid',right_on='Seq.ID',how='inner')
+result1 = pd.merge(df, struc1, left_on='sseqid',right_on='SARG.Seq.ID',how='inner')
 result1_type = result1.groupby(['qseqid_modi', 'Type'])[['ratio']].agg('sum')
 result1_subtype = result1.groupby(['qseqid_modi', 'Subtype'])[['ratio']].agg('sum')
 result1_gene = result1.groupby(['qseqid_modi', 'sseqid'])[['ratio']].agg('sum')
@@ -117,7 +128,7 @@ ppm1_type = result1.groupby(['qseqid_modi', 'Type'])[['count']].agg('sum')
 ppm1_subtype = result1.groupby(['qseqid_modi', 'Subtype'])[['count']].agg('sum')
 ppm1_gene = result1.groupby(['qseqid_modi', 'sseqid'])[['count']].agg('sum')
 
-result2 = pd.merge(df, struc2, left_on='sseqid',right_on='Seq.ID',how='inner')
+result2 = pd.merge(df, struc2, left_on='sseqid',right_on='SARG.Seq.ID',how='inner')
 result2['ratio_modifi']=result2['ratio']/3
 result2_type = result2.groupby(['qseqid_modi', 'Type'])[['ratio_modifi']].agg('sum')
 result2_subtype = result2.groupby(['qseqid_modi', 'Subtype'])[['ratio_modifi']].agg('sum')
@@ -127,7 +138,7 @@ ppm2_type = result2.groupby(['qseqid_modi', 'Type'])[['count']].agg('sum')
 ppm2_subtype = result2.groupby(['qseqid_modi', 'Subtype'])[['count']].agg('sum')
 ppm2_gene = result2.groupby(['qseqid_modi', 'sseqid'])[['count']].agg('sum')
 
-result3 = pd.merge(df, struc3, left_on='sseqid',right_on='Seq.ID',how='inner')
+result3 = pd.merge(df, struc3, left_on='sseqid',right_on='SARG.Seq.ID',how='inner')
 result3['ratio_modifi']=result3['ratio']/2
 result3_type = result3.groupby(['qseqid_modi', 'Type'])[['ratio_modifi']].agg('sum')
 result3_subtype = result3.groupby(['qseqid_modi', 'Subtype'])[['ratio_modifi']].agg('sum')
@@ -187,7 +198,6 @@ genecell = result1_gene.pivot(index='sseqid', columns='qseqid_modi')['percell'].
 gene16s = result1_gene.pivot(index='sseqid', columns='qseqid_modi')['per16s'].fillna(0).sort_index()
 geneppm = ppm1_gene.pivot(index='sseqid', columns='qseqid_modi')['ppm'].fillna(0).sort_index()
 
-
 #### write out ###
 typecell.to_csv(str(args.o)+".normalize_cellnumber.type.txt",sep='\t')
 type16s.to_csv(str(args.o)+".normalize_16s.type.txt",sep='\t')
@@ -198,3 +208,5 @@ subtypeppm.to_csv(str(args.o)+".ppm.subtype.txt",sep='\t')
 genecell.to_csv(str(args.o)+".normalize_cellnumber.gene.txt",sep='\t')
 gene16s.to_csv(str(args.o)+".normalize_16s.gene.txt",sep='\t')
 geneppm.to_csv(str(args.o)+".ppm.gene.txt",sep='\t')
+
+logger.info('Done')

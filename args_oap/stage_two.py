@@ -17,7 +17,6 @@ def stage_two(options):
     '-e', str(options.e),
     '-d', str(options.d),
     '-db',options.db,
-    '-fa',options.fa,
     '-struc1',options.struc1,
     '-struc2',options.struc2,
     '-struc3',options.struc3]
