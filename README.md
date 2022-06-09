@@ -111,10 +111,10 @@ There are some questions raised by users, please refer to the [FAQ](https://gith
 
 ## Changes log
 #### Version 3.1 (09. June, 2022)
-+ Minor changes of the SARG database (now the [SARG v3.0-M](https://smile.hku.hk/pipeline/#/Indexing/download) database includes both multi-component and two-component ARGs).
-+ Remove the constraint on diamond's version, add a new parameter `-w` (query coverage, default 65%) and changed the default parameter of `-v` (identity, default 40%) in stageone to compensate the difference in USCMG.
-+ Add a `mt_mode` switcher in stagetwo's blastx to make it faster when more than 5 cores are available.
-+ Add a logger to make stagetwo's output more clear.
++ Minor changes to the SARG database (see [SARG v3.0-M](https://smile.hku.hk/pipeline/#/Indexing/download)).
++ Update diamond to the latest version (from 0.9.24 to 2.0.15), add a new parameter `-w` (query coverage, default 65%) and modify the default parameter of `-v` (identity, default 40%) in stageone to compensate the difference in USCMG estimation.
++ Add a `mt_mode` switcher in stagetwo's blastx to make the pipeline faster when more than 5 cores are available.
++ Add a logger to make stagetwo's stdout more clear.
 
 #### Version 3.0 (04. June, 2022)
 + We updated the SARG database and the corresponding structure file to version 3.0 ([SARG v3.0-M](https://smile.hku.hk/pipeline/#/Indexing/download)) .
