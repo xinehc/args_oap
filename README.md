@@ -1,4 +1,4 @@
-# ARGs_OAP v3.1 (beta)
+# ARGs_OAP (beta)
 This repository was created by Xiaole Yin (_xiaole99_) and is currently maintained by Xi Chen (_xinhec_). The goal is to make args_oap faster, and easier to run. 
 
 If you have any questions, please contact Xiaole Yin ([yinlele99@gmail.com](yinlele99@gmail.com)).
@@ -6,12 +6,12 @@ If you have any questions, please contact Xiaole Yin ([yinlele99@gmail.com](yinl
 ## Installation
 Conda (osx-64/linux-64):
 ```bash
-conda install -c bioconda -c conda-forge xinehc::args_oap=3.1
+conda install -c bioconda -c conda-forge xinehc::args_oap=3.1.1
 ```
 
 We'd suggest to create a new conda environment (here use `-n args_oap` as an example) to avoid potential conflicts of dependencies:
 ```bash
-conda create -n args_oap -c bioconda -c conda-forge xinehc::args_oap=3.1
+conda create -n args_oap -c bioconda -c conda-forge xinehc::args_oap=3.1.1
 conda activate args_oap
 ```
 
@@ -40,24 +40,24 @@ After `stage_one`, a `meta_data_online.txt` file can be found in `output`. It su
 
 | SampleID | Name     | Category | ReadLength | #ofReads | #of16Sreads      | CellNumber       |
 |----------|----------|----------|------------|----------|------------------|------------------|
-| 1        | STAS     | ST       | 100        | 200000   | 9.35754189944134 | 2.82910169634418 |
-| 2        | SWHAS104 | SWH      | 100        | 200000   | 8.5195530726257  | 3.16376328499407 |
+| 1        | STAS     | ST       | 100        | 200000   | 8.22929787979405 | 2.82910169634418 |
+| 2        | SWHAS104 | SWH      | 100        | 200000   | 7.00954780712517 | 3.16376328499407 |
 
 After `stagetwo`, the normalized ARGs copies per 16s/cells or hits/reads will be shown in several `*_normalized_*.txt` files. For example, `output.normalize_16s.type` means:
 + **normalized_16s** - normalized against 16s rRNA copies
 + **type** - Type of ARGs (the hierarchy in SARG is type -> subtype -> gene)
 
-| Type                                | STAS                 | SWHAS104              |
-|-------------------------------------|----------------------|-----------------------|
-| aminoglycoside                      | 0.014248756218905473 | 0.05778644603054001   |
-| bacitracin                          | 0.012526379093543273 | 0.02387830588588363   |
-| beta_lactam                         | 0.0                  | 0.06118010268499747   |
-| macrolide-lincosamide-streptogramin | 0.0                  | 0.009842691110578379  |
-| multidrug                           | 0.004327798193369976 | 0.013092162368663536  |
-| mupirocin                           | 0.002609025186567164 | 0.0037497024423531647 |
-| quinolone                           | 0.1272415290809021   | 0.036200398345334756  |
-| sulfonamide                         | 0.011830148152227792 | 0.056019782667944225  |
-| tetracycline                        | 0.004097610108964381 | 0.04088706547697995   |
+| Type                                | STAS                  | SWHAS104             |
+|-------------------------------------|-----------------------|----------------------|
+| aminoglycoside                      | 0.016202273302162954  | 0.07023487211759523  |
+| bacitracin                          | 0.014243756749154245  | 0.029022199416685355 |
+| beta_lactam                         | 0.0                   | 0.07435959439262277  |
+| macrolide-lincosamide-streptogramin | 0.0                   | 0.011963015532727397 |
+| multidrug                           | 0.0049211431544144806 | 0.015912491818927718 |
+| mupirocin                           | 0.002966724847808158  | 0.004557467877130285 |
+| quinolone                           | 0.14468645528642882   | 0.043998731935285834 |
+| sulfonamide                         | 0.01345207192984009   | 0.06808763199694169  |
+| tetracycline                        | 0.004659396079993181  | 0.04969500656817938  |
 
 ###  (mandatory) Prepare the meta-data.txt file
 (We hope to remove the manual meta-data.txt preparation step in future updates)
@@ -110,6 +110,11 @@ There are some questions raised by users, please refer to the [FAQ](https://gith
 
 
 ## Changes log
+#### Version 3.1.1 (13. June, 2022)
++ Modify the formula of #16s, now the numerator is the aligned length `length` (previously read length) and the denominator is the subject length `slen` (previously 1432, the averaged length of 16s). This will lead to a slight drop of #16s in meta_data_online.txt. 
++ Fix a bug that caused some 16s to be counted more than one times when multiple high scoring pairs (HSPs) are returned by blastn.
+
+
 #### Version 3.1 (09. June, 2022)
 + Minor changes to the SARG database (see [SARG v3.0-M](https://smile.hku.hk/pipeline/#/Indexing/download)).
 + Update diamond to the latest version (from 0.9.24 to 2.0.15), add a new parameter `-w` (query coverage, default 65%) and modify the default parameter of `-v` (identity, default 40%) in stageone to compensate the difference in USCMG estimation.

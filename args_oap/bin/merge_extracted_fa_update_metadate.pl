@@ -76,39 +76,30 @@ for my $ids (sort {$a <=> $b}  keys %sampleid){
 		die "wrong run\n";
 	}
 	
-	##for 16s
-	# my $s16num1s = 0;
-	# if(-e "$opt_o/$sampleid{$ids}_1.sam"){
- #               my $s16num1s = `samtools view -F 4 $opt_o/$sampleid{$ids}_1.sam|wc -l`;
- #        }else{
- #               die "wrong run\n";
- #        }
-
- #       	if(-e "$opt_o/$sampleid{$ids}_2.sam"){
- #               my $s16num2s = `samtools view -F 4 $opt_o/$sampleid{$ids}_2.sam|wc -l`;
-	#        my $s16nums = $s16num1s + $s16num2s;
- #               $hash16s{$sampleid{$ids}} = $s16nums * $samplerlen{$ids} / 1432;
- #        }else{
-	#        $hash16s{$sampleid{$ids}} = $s16num1s * $samplerlen{$ids} / 1432;
- #               die "wrong run\n";
- #        }
-
         ##for 16s
-        $hash16s{$sampleid{$ids}} = 0;
-        if(-e "$opt_o/$sampleid{$ids}.16s_1.blast"){
-                my $s16num1s = `cat $opt_o/$sampleid{$ids}.16s_1.blast | uniq | wc -l`;
-                $hash16s{$sampleid{$ids}} += $s16num1s * $samplerlen{$ids} / 1432;
-        }else{
-               die "wrong run\n";
-        }
-        
-        if(-e "$opt_o/$sampleid{$ids}.16s_2.blast"){
-               my $s16num2s = `cat $opt_o/$sampleid{$ids}.16s_2.blast | uniq | wc -l`;
-               $hash16s{$sampleid{$ids}} += $s16num2s * $samplerlen{$ids} / 1432;
-        }else{
-               die "wrong run\n";
-        }
+        if(-e "$opt_o/$sampleid{$ids}.16s_1.blast" && -e "$opt_o/$sampleid{$ids}.16s_2.blast"){
+                die "$!\n" unless open(TS1, "$opt_o/$sampleid{$ids}.16s_1.blast");
+                die "$!\n" unless open(TS2, "$opt_o/$sampleid{$ids}.16s_2.blast");
+                my $scov = 0;
+                while(<TS1>){
+                        chomp;
+                        my @tem = split /\t/;
+                        $scov += $tem[2] / $tem[3]; # length / slen
+                }
+                close TS1;
 
+                while(<TS2>){
+                        chomp;
+                        my @tem = split /\t/;
+                        $scov += $tem[2] / $tem[3]; # length / slen
+                }
+                close TS2;
+                $hash16s{$sampleid{$ids}} = $scov;
+
+        }else{
+                die "wrong run\n";
+
+        }
 
         ##for cell number counting from the USCMGs 
 	if(-e "$opt_o/$sampleid{$ids}.uscmg.blastx.txt"){
