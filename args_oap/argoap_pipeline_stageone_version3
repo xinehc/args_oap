@@ -205,8 +205,8 @@ for my $fq (sort {$a <=> $b } keys %samples){
     print BASH "bwa mem -t $opt_n $ggnr85 $f1 | samtools fasta -F4 -F0x900 - > $us161\n";
     print BASH "bwa mem -t $opt_n $ggnr85 $f2 | samtools fasta -F4 -F0x900 - > $us162\n";
 
-    print BASH "blastn -max_target_seqs 1 -db $ggnr85blast -query $us161 -out $us161blast -evalue $eval1 -outfmt '6 qseqid' -num_threads $opt_n\n";
-    print BASH "blastn -max_target_seqs 1 -db $ggnr85blast -query $us162 -out $us162blast -evalue $eval1 -outfmt '6 qseqid' -num_threads $opt_n\n";
+    print BASH "blastn -max_hsps 1 -max_target_seqs 1 -db $ggnr85blast -query $us161 -out $us161blast -evalue $eval1 -outfmt '6 qseqid sseqid length slen' -num_threads $opt_n\n";
+    print BASH "blastn -max_hsps 1 -max_target_seqs 1 -db $ggnr85blast -query $us162 -out $us162blast -evalue $eval1 -outfmt '6 qseqid sseqid length slen' -num_threads $opt_n\n";
     # print BASH "minimap2 -ax sr $ggnr85 $f1 >$us161\n";
     # print BASH "minimap2 -ax sr $ggnr85 $f2 >$us162\n";
     
@@ -251,7 +251,7 @@ my $metaout = "$opt_o/meta_data_online.txt";
 my $extractfa = "$opt_o/extracted.fa";
 #option -c do copy number correction
 
-print BASH "$ublastxdir/bin/merge_extracted_fa_update_metadate.v2.3.pl $opt_i $opt_o $opt_m $metaout $extractfa U $genekolist\n";
+print BASH "$ublastxdir/bin/merge_extracted_fa_update_metadate.pl $opt_i $opt_o $opt_m $metaout $extractfa U $genekolist\n";
 
 close BASH;
 
