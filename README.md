@@ -111,8 +111,9 @@ There are some questions raised by users, please refer to the [FAQ](https://gith
 
 ## Changes log
 #### Version 3.1.1 (13. June, 2022)
-+ Modify the formula of #16s, now the numerator is the aligned length `length` (previously read length) and the denominator is the subject length `slen` (previously 1432, the averaged length of 16s). This will lead to a slight drop of #16s in meta_data_online.txt. 
-+ Fix a bug that caused some 16s to be counted more than one times when multiple high scoring pairs (HSPs) are returned by blastn.
++ If you are expecting results in the unit of copy of ARGs per cell (from essential single copy marker genes), this version of fixation won't affect you. In detail:
+   + A bug related to the calculation of estimated 16S rDNA numbers was fixed. Now the numerator is the aligned length instead of read length, and the denominator is the subject length instead of 1432 (the averaged length of 16S rDNA). This will lead to a slight drop of #16s in meta_data_online.txt. 
+   + Fix a bug when estimating cell numbers from the 16S copyrighter. Bugs caused some 16s to be counted more than one times when multiple high scoring pairs (HSPs) are returned by blastn.
 
 
 #### Version 3.1 (09. June, 2022)
