@@ -86,6 +86,22 @@ SampleID | Name | Category |ReadLength
 For users have very big data and prefer complex running:  
 1. users run locally by themselves to get the blastx outfmt 6 format resutls by alighment against SARG2.2.  
 **A typical scene is that users can paralelly run the blastx on clusters by multi-nodes, and then merge the blastx output as the input for the -b option.**  
+```bash
+SARGDB=`python -c "import os,args_oap;print(os.path.join(args_oap.__path__[0], 'DB/SARG.fasta'))"`
+
+blastx -db $SARGDB \
+-query sample_extracted.fa \
+-out sample_blastx.out.txt \
+-outfmt 6 qseqid sseqid pident length evalue bitscore slen qlen \
+-max_target_seqs 5 \
+-evalue 1e-7 \
+-num_threads 8 \
+-mt_mode 0 
+
+# then concatenate all sample blastx output
+cat *_blastx.out.txt > merge_blastx.out.txt
+```
+
 2. use -b option for the stage two script:   
 
 ```bash
