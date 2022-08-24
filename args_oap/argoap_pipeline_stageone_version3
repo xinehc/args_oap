@@ -200,9 +200,7 @@ for my $fq (sort {$a <=> $b } keys %samples){
 
 	} else {
 	    if (-f "$opt_d.ndb") {
-	    	unless (-f "$opt_d.bwt"){
-	    		print BASH "bwa index $opt_d";
-	    	}
+
     		my $temp1 = "$opt_o/$samples{$fq}_1.temp";
 			my $temp2 = "$opt_o/$samples{$fq}_2.temp";
 
