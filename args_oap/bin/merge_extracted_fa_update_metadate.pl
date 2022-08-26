@@ -67,7 +67,7 @@ my %cellnum;
 for my $ids (sort {$a <=> $b}  keys %sampleid){
 
 	##for each sample statistic the number of reads and number of 16S reads
-	if(-e "$opt_i/$sampleid{$ids}_1.fa" && -e "$opt_i/$sampleid{$ids}_1.fa"){
+	if(-e "$opt_i/$sampleid{$ids}_1.fa" && -e "$opt_i/$sampleid{$ids}_2.fa"){
 			my $num1 = `grep ">" $opt_i/$sampleid{$ids}_1.fa -c`;
 			my $num2 = `grep ">" $opt_i/$sampleid{$ids}_2.fa -c`;
 			my $ns = $num1 + $num2;

@@ -10,6 +10,7 @@ while(<I>){
 	chomp;
 	my @tm = split(/\t/,$_);
 	$tm[0] = (split(/\s+/, $tm[0]))[0];	
+	$tm[0] = (split('/', $tm[0]))[0];
 	#print "$tm[0]\n";
 	if(exists $get{$tm[0]}){
 		print "duplicate $tm[0] $tm[1] in blastout6 with maxaccepts 1 in usearch sequencing file contain same name\n";
@@ -31,6 +32,7 @@ while(my $block = <II>){
 	chomp($block);
 	my @tem = split("\n", $block, 2);	
 	my $id = (split(/\s+/, $tem[0]))[0];
+	$id = (split('/', $id))[0];
 	my $seq = $tem[1];
 	$seq =~ s/\n//g;
 	#print "$id\n";
