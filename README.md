@@ -6,7 +6,7 @@ If you have any questions, please contact Xiaole Yin ([yinlele99@gmail.com](yinl
 ## Installation
 Conda (osx-64/linux-64):
 ```bash
-conda install -c bioconda -c conda-forge xinehc::args_oap=3.1.2
+conda install -c bioconda -c conda-forge xinehc::args_oap=3.1.4
 ```
 
 We'd suggest to create a new conda environment (here use `-n args_oap` as an example) to avoid potential conflicts of dependencies:
@@ -52,8 +52,8 @@ After `stagetwo`, the normalized ARGs copies per 16s/cells or hits/reads will be
 | aminoglycoside                      | 0.016202273302162954  | 0.07023487211759523  |
 | bacitracin                          | 0.014243756749154245  | 0.029022199416685355 |
 | beta_lactam                         | 0.0                   | 0.07435959439262277  |
-| macrolide-lincosamide-streptogramin | 0.0                   | 0.011963015532727397 |
-| multidrug                           | 0.0049211431544144806 | 0.015912491818927718 |
+| macrolide-lincosamide-streptogramin | 0.0                   | 0.011958685753535675 |
+| multidrug                           | 0.004916222011260065  | 0.01590189961576445  |
 | mupirocin                           | 0.002966724847808158  | 0.004557467877130285 |
 | quinolone                           | 0.14468645528642882   | 0.043998731935285834 |
 | sulfonamide                         | 0.01345207192984009   | 0.06808763199694169  |
@@ -145,17 +145,19 @@ args_oap stage_two -i output/extracted.fa -m output/meta_data_online.txt -o outp
 
 
 ## Changes log
+
+#### Version 3.1.3 (29. August, 2022)
++ Update database to the release version (29082022 short).
+
 #### Version 3.1.2 (24. August, 2022)
 + Support customized database (testing).
 + Fix a bug of ppm normalization, now the formula is `#hits * 1e6 / #reads`.
 + Simply stagetwo's script, add more information for users.
 
-
 #### Version 3.1.1 (13. June, 2022)
 (If you are expecting results in the unit of ARGs copies per cell (from essential single copy marker genes), this version of fixation won't affect you.)
 + Fix a bug related to the calculation of 16S rDNA copies. Now the numerator is the aligned length instead of read length, and the denominator is the subject length instead of 1432 (the averaged length of 16S rDNA). This will lead to a slight drop of #16S in meta\_data\_online.txt. 
 + Fix a bug when estimating 16S rDNA numbers, which causes some 16S to be counted more than one times when multiple high scoring pairs (HSPs) are returned by blastn.
-
 
 #### Version 3.1 (09. June, 2022)
 + Minor changes to the SARG database (see [SARG v3.0-M](https://smile.hku.hk/pipeline/#/Indexing/download)).
