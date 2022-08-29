@@ -6,12 +6,12 @@ If you have any questions, please contact Xiaole Yin ([yinlele99@gmail.com](yinl
 ## Installation
 Conda (osx-64/linux-64):
 ```bash
-conda install -c bioconda -c conda-forge xinehc::args_oap=3.1.4
+conda install -c bioconda -c conda-forge xinehc::args_oap=3.1.3
 ```
 
 We'd suggest to create a new conda environment (here use `-n args_oap` as an example) to avoid potential conflicts of dependencies:
 ```bash
-conda create -n args_oap -c bioconda -c conda-forge xinehc::args_oap=3.1.2
+conda create -n args_oap -c bioconda -c conda-forge xinehc::args_oap=3.1.3
 conda activate args_oap
 ```
 
