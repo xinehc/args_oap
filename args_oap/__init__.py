@@ -1,3 +1,3 @@
 """Top-level package for args_oap."""
 
-__version__ = '3.1.2'
+__version__ = '3.1.3'
