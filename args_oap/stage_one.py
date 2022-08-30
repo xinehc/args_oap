@@ -19,7 +19,8 @@ def stage_one(options):
     '-y', str(options.y),
     '-v', str(options.v),
     '-w', str(options.w),
-    '-d', str(options.db)]
+    '-d', str(options.db),
+    '-s', str(options.skip)]
 
     subprocess.call(args)
     

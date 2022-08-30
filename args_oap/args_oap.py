@@ -29,6 +29,7 @@ def parse_options(argv):
     optional_one.add_argument('-v', help='the identity cutoff for diamond to search the USCMGs default 40', default=40)
     optional_one.add_argument('-w', help='the query cover cutoff for diamond to search the USCMGs default 65', default=65)
     optional_one.add_argument('-db', help='database, default sarg', default='')
+    optional_one.add_argument('-skip', help='skip cell number and 16s calculation', action='store_true')
     parser_stage_one.set_defaults(func=stage_one)
 
     ## stage_one parameters

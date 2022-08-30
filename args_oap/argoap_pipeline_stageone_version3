@@ -19,30 +19,31 @@ BEGIN {
     unshift @INC, "$ublastxdir/bin";
 }
 
-our ($opt_h, $opt_i, $opt_o, $opt_n, $opt_m, $opt_f, $opt_z, $opt_x, $opt_y, $opt_v, $opt_w, $opt_d, $opt_q) = "";
+our ($opt_h, $opt_i, $opt_o, $opt_n, $opt_m, $opt_f, $opt_z, $opt_x, $opt_y, $opt_v, $opt_w, $opt_d, $opt_q, $opt_s) = "";
 my  $usage = <<USE;
-	$0 -i <Fq input dir> -m <Metadata_map.txt> -o <output dir> -n [number of threads] -f [fa|fq] -z -h
+    $0 -i <Fq input dir> -m <Metadata_map.txt> -o <output dir> -n [number of threads] -f [fa|fq] -z -h
 
-	-i Input files directory, required
-	-m meta data file, required
-	-o Output files directory, default current directory
-	-n number of threads, default 1
-	-f the format of processed files, default fq
-	-q quality control of fastq sequences defualt not take effect, set to 1, then will do QC with fastp
-	-z whether the fq files were .gz format, if -z, then firstly gzip -d, default (none) 
-	-x evalue for searching 16S in usearch default 1e-10
-	-y evalue for searching universal single copy marker gene default 3
-	-v the identity value for diamond to search the USCMGs default 40
-	-w the query cover value for diamond to search the USCMGs default 65
-	-db database, default SARG database
-	-h print this help information
+    -i Input files directory, required
+    -m meta data file, required
+    -o Output files directory, default current directory
+    -n number of threads, default 1
+    -f the format of processed files, default fq
+    -q quality control of fastq sequences defualt not take effect, set to 1, then will do QC with fastp
+    -z whether the fq files were .gz format, if -z, then firstly gzip -d, default (none) 
+    -x evalue for searching 16S in usearch default 1e-10
+    -y evalue for searching universal single copy marker gene default 3
+    -v the identity value for diamond to search the USCMGs default 40
+    -w the query cover value for diamond to search the USCMGs default 65
+    -db database, default SARG database
+    -skip skip 16s and cell number calculation
+    -h print this help information
 USE
 
 #Get all the input parameters
 
-getopts('i:o:m:n:f:q:z:x:y:v:w:d:h');
+getopts('i:o:m:n:f:q:z:x:y:v:w:d:s:h');
 if($opt_h  ||  ($opt_i eq "") ){
-	die "$usage\n";
+    die "$usage\n";
 }
 
 $opt_n ||= 1;
@@ -59,7 +60,7 @@ my $eval2 =$opt_y;
 my $did = $opt_v; ##identity for diamond searching
 
 unless(-d $opt_o){
-	`mkdir $opt_o`;
+    `mkdir $opt_o`;
 }
 
 my $logF = "$opt_o/Log.txt";
@@ -98,11 +99,11 @@ my %metainfo;
 die "$!\n" unless open(META,"$opt_m");
 <META>;
 while(<META>){
-	chomp;
-	my $info = $_;
-	my @tem = split("\t", $_);
-	$samples{$tem[0]} = $tem[1];
-	$metainfo{$tem[0]} = $info;
+    chomp;
+    my $info = $_;
+    my @tem = split("\t", $_);
+    $samples{$tem[0]} = $tem[1];
+    $metainfo{$tem[0]} = $info;
 }#
 close META;
 
@@ -116,144 +117,123 @@ my %sample16s; #this hash store 16S number of each sample
 
 for my $fq (sort {$a <=> $b } keys %samples){
 
-	##process each sample separately 
-	print BASH "#Processing fq $fq begain:\n";
-	
-	my ($f1,$f2) = ("","");
-	if($opt_f eq "fq"){
-		if($opt_z){				
-			$f1 = "$opt_i/$samples{$fq}_1.fq.gz";
-			$f2 = "$opt_i/$samples{$fq}_2.fq.gz";
-			die "No $f1\t$f2\n" unless(-e $f1 && -e $f2);
-			print BASH "gzip -f -d $f1\n";
-			print BASH "gzip -f -d $f2\n";
-			$f1 = "$opt_i/$samples{$fq}_1.fq";
-			$f2 = "$opt_i/$samples{$fq}_2.fq";
-	
-			##if quality control needed using fastp to do it
-			if($opt_q){
-				my $fo1 = "$opt_i/$samples{$fq}.fastp.1.fq";
-				my $fo2 = "$opt_i/$samples{$fq}.fastp.2.fq";
-				print BASH "fastp -i $f1 -I $f2 -o $fo1 -O $fo2 -w $opt_n -j $opt_i/$samples{$fq}.jason -h $opt_i/$samples{$fq}.html\n";
-				$f1 = $fo1;
-				$f2 = $fo2;
-				
-			}
-
-		}else{
-			$f1 = "$opt_i/$samples{$fq}_1.fq";
-			$f2 = "$opt_i/$samples{$fq}_2.fq";
-			##Need to transform fq to fa		
-			die "No $f1\t$f2\n" unless(-e $f1 && -e $f2); 		
-
-			if($opt_q){
-				my $fo1 = "$opt_i/$samples{$fq}.fastp.1.fq";
-				my $fo2 = "$opt_i/$samples{$fq}.fastp.2.fq";
-				print BASH "fastp -i $f1 -I $f2 -o $fo1 -O $fo2 -w $opt_n -j $opt_i/$samples{$fq}.jason -h $opt_i/$samples{$fq}.html\n";
-				$f1 = $fo1;
-				$f2 = $fo2;
-				
-			}
-
-		}
-
-		##Fq -> fa
-		my $fa1 = "$opt_i/$samples{$fq}_1.fa";
-		my $fa2 = "$opt_i/$samples{$fq}_2.fa";
-
-		print BASH "perl  $ublastxdir/bin/Fq2fa.pl $f1 $fa1\n";
-		print BASH "perl  $ublastxdir/bin/Fq2fa.pl $f2 $fa2\n";
-		
-		$f1 = $fa1;
-		$f2 = $fa2;	##Read Files and keep $f1 $f2 store fa name
-
-
-	}elsif( $opt_f eq "fa"){
-		$f1 = "$opt_i/$samples{$fq}_1.fa";
-		$f2 = "$opt_i/$samples{$fq}_2.fa";
-		die "No $f1\t$f2\n" unless(-e $f1 && -e $f2);
-	}else{
-		die "Wrong format, files were not end with fa or fq\n";
-	}##Fq->fa
-
-
-
-
-	my $uso1 = "$opt_o/$samples{$fq}_1.us";
-	my $uso2 = "$opt_o/$samples{$fq}_2.us";
-	# my $us161 = "$opt_o/$samples{$fq}_1.sam";
-	# my $us162 = "$opt_o/$samples{$fq}_2.sam";
- 	my $us161 = "$opt_o/$samples{$fq}.16s_1.fa";
-    my $us162 = "$opt_o/$samples{$fq}.16s_2.fa";
-    my $us161blast = "$opt_o/$samples{$fq}.16s_1.blast";
-    my $us162blast = "$opt_o/$samples{$fq}.16s_2.blast";
-	#my $f1fixed = "$opt_o/$samples{$fq}_fixed_1.fa";
-	#my $f2fixed = "$opt_o/$samples{$fq}_fixed_2.fa";
-	#my $sing = "$opt_o/$samples{$fq}_singletons.fa";
-
-
-
-	if (-f "$opt_d.dmnd") {
-		##do usearch against ARDB to extract potential ARG reads
-	    print BASH "diamond blastx --quiet -d $opt_d.dmnd -q $f1 -o $uso1 -e 10 -p $opt_n -k 1 --id 60 --query-cover 15\n";
-    	print BASH "diamond blastx --quiet -d $opt_d.dmnd -q $f2 -o $uso2 -e 10 -p $opt_n -k 1 --id 60 --query-cover 15\n";
-
-	} else {
-	    if (-f "$opt_d.ndb") {
-
-    		my $temp1 = "$opt_o/$samples{$fq}_1.temp";
-			my $temp2 = "$opt_o/$samples{$fq}_2.temp";
-
-	    	print BASH "bwa mem -v 1 -t $opt_n $opt_d $f1 | samtools fasta -F4 -F0x900 - > $temp1\n";
-	    	print BASH "bwa mem -v 1 -t $opt_n $opt_d $f2 | samtools fasta -F4 -F0x900 - > $temp2\n";
-	    	print BASH "blastn -max_hsps 1 -max_target_seqs 1 -db $opt_d -query $temp1 -out $uso1 -evalue 10 -num_threads $opt_n -outfmt '6 qseqid sseqid'\n";
-	    	print BASH "blastn -max_hsps 1 -max_target_seqs 1 -db $opt_d -query $temp2 -out $uso2 -evalue 10 -num_threads $opt_n -outfmt '6 qseqid sseqid'\n";
-
-	    	##new nucl database
-		} else {
-			die "Cannot detect the type of the Database, please run makedb (prot) or makeblastdb (nucl) first!\n"
-		}
-	}
-
-
-    #print BASH "$ublastxdir/bin/usearchv8 -ublast $f1 -db $opt_d -evalue 1e-5 -accel 0.5 -blast6out $uso1 -threads $opt_n -maxaccepts 1\n";
-
-        
-    ##do usearch against greengene nr90 database to calculate 16S copies number
-    #print BASH "$ublastxdir/bin/usearchv8 -ublast $f1 -db $ggnr85 -evalue $eval1 -accel 0.5 -blast6out $us16s1 -threads $opt_n -strand both  -maxaccepts 1\n";
-    #print BASH "$ublastxdir/bin/usearchv8 -ublast $f2 -db $ggnr85 -evalue $eval1 -accel 0.5 -blast6out $us16s2 -threads $opt_n -strand both  -maxaccepts 1\n\n";
-    #print BASH "$ublastxdir/bin/bbmap/repair.sh in1=$f1 in2=$f2 out1=$f1fixed out2=$f2fixed outs=$sing repair\n";
-    print BASH "bwa mem -v 1 -t $opt_n $ggnr85 $f1 | samtools fasta -F4 -F0x900 - > $us161\n";
-    print BASH "bwa mem -v 1 -t $opt_n $ggnr85 $f2 | samtools fasta -F4 -F0x900 - > $us162\n";
-
-    print BASH "blastn -max_hsps 1 -max_target_seqs 1 -db $ggnr85blast -query $us161 -out $us161blast -evalue $eval1 -outfmt '6 qseqid sseqid length slen' -num_threads $opt_n\n";
-    print BASH "blastn -max_hsps 1 -max_target_seqs 1 -db $ggnr85blast -query $us162 -out $us162blast -evalue $eval1 -outfmt '6 qseqid sseqid length slen' -num_threads $opt_n\n";
-    # print BASH "minimap2 -ax sr $ggnr85 $f1 >$us161\n";
-    # print BASH "minimap2 -ax sr $ggnr85 $f2 >$us162\n";
+    ##process each sample separately 
+    print BASH "#Processing fq $fq begain:\n";
     
+    my ($f1,$f2) = ("","");
+    if($opt_f eq "fq"){
+        if($opt_z){
+            $f1 = "$opt_i/$samples{$fq}_1.fq.gz";
+            $f2 = "$opt_i/$samples{$fq}_2.fq.gz";
+            die "No $f1\t$f2\n" unless(-e $f1 && -e $f2);
+            print BASH "gzip -f -d $f1\n";
+            print BASH "gzip -f -d $f2\n";
+            $f1 = "$opt_i/$samples{$fq}_1.fq";
+            $f2 = "$opt_i/$samples{$fq}_2.fq";
+    
+            ##if quality control needed using fastp to do it
+            if($opt_q){
+                my $fo1 = "$opt_i/$samples{$fq}.fastp.1.fq";
+                my $fo2 = "$opt_i/$samples{$fq}.fastp.2.fq";
+                print BASH "fastp -i $f1 -I $f2 -o $fo1 -O $fo2 -w $opt_n -j $opt_i/$samples{$fq}.jason -h $opt_i/$samples{$fq}.html\n";
+                $f1 = $fo1;
+                $f2 = $fo2;
+                
+            }
+
+        }else{
+            $f1 = "$opt_i/$samples{$fq}_1.fq";
+            $f2 = "$opt_i/$samples{$fq}_2.fq";
+            ##Need to transform fq to fa        
+            die "No $f1\t$f2\n" unless(-e $f1 && -e $f2);       
+
+            if($opt_q){
+                my $fo1 = "$opt_i/$samples{$fq}.fastp.1.fq";
+                my $fo2 = "$opt_i/$samples{$fq}.fastp.2.fq";
+                print BASH "fastp -i $f1 -I $f2 -o $fo1 -O $fo2 -w $opt_n -j $opt_i/$samples{$fq}.jason -h $opt_i/$samples{$fq}.html\n";
+                $f1 = $fo1;
+                $f2 = $fo2;
+                
+            }
+        }
+
+        ##Fq -> fa
+        my $fa1 = "$opt_i/$samples{$fq}_1.fa";
+        my $fa2 = "$opt_i/$samples{$fq}_2.fa";
+
+        print BASH "perl  $ublastxdir/bin/Fq2fa.pl $f1 $fa1\n";
+        print BASH "perl  $ublastxdir/bin/Fq2fa.pl $f2 $fa2\n";
+        
+        $f1 = $fa1;
+        $f2 = $fa2; ##Read Files and keep $f1 $f2 store fa name
 
 
-	##extract potential reads for each sample
-	my $e1fa = "$opt_o/$samples{$fq}.extract_1.fa";
-	my $e2fa = "$opt_o/$samples{$fq}.extract_2.fa";
-	print BASH "$ublastxdir/bin/extract_usearch_reads.pl $uso1 $f1 $e1fa\n";
-	print BASH "$ublastxdir/bin/extract_usearch_reads.pl $uso2 $f2 $e2fa\n";
-
-	##Obtain microbial community by 16S hyper variable informaton in shotgun metagenomics data
-	##This option is heavy locading in computation
-	
-    ##using the USCMGs method to get the cell number 
-    my $dmd1out = "$opt_o/$samples{$fq}.uscmg_1.dmd"; 	
-	my $dmd2out = "$opt_o/$samples{$fq}.uscmg_2.dmd";
-	my $dmout = "$opt_o/$samples{$fq}.uscmg.blastx.txt";
-	
-	print BASH "\n#Using Diamond to search USCMGs\n";
-	print BASH "diamond blastx --quiet -q $f1 -d $KO30DMD -o $dmd1out -f tab  -p $opt_n -e $eval2 --id $did --query-cover $opt_w --max-target-seqs 1\n";		
-	print BASH "diamond blastx --quiet -q $f2 -d $KO30DMD -o $dmd2out -f tab  -p $opt_n -e $eval2 --id $did --query-cover $opt_w --max-target-seqs 1\n";		
-	print BASH "cat $dmd1out $dmd2out > $dmout\n"
-			
+    }elsif( $opt_f eq "fa"){
+        $f1 = "$opt_i/$samples{$fq}_1.fa";
+        $f2 = "$opt_i/$samples{$fq}_2.fa";
+        die "No $f1\t$f2\n" unless(-e $f1 && -e $f2);
+    }else{
+        die "Wrong format, files were not end with fa or fq\n";
+    }##Fq->fa
 
 
+    ## prefiltering
+    my $uso1 = "$opt_o/$samples{$fq}_1.us";
+    my $uso2 = "$opt_o/$samples{$fq}_2.us";
+
+    if (-f "$opt_d.dmnd") {
+        ##do usearch against ARDB to extract potential ARG reads
+        print BASH "diamond blastx --quiet -d $opt_d.dmnd -q $f1 -o $uso1 -e 10 -p $opt_n -k 1 --id 60 --query-cover 15\n";
+        print BASH "diamond blastx --quiet -d $opt_d.dmnd -q $f2 -o $uso2 -e 10 -p $opt_n -k 1 --id 60 --query-cover 15\n";
+
+    } else {
+        if (-f "$opt_d.ndb") {
+
+            my $temp1 = "$opt_o/$samples{$fq}_1.temp";
+            my $temp2 = "$opt_o/$samples{$fq}_2.temp";
+
+            print BASH "bwa mem -v 1 -t $opt_n $opt_d $f1 | samtools fasta -F4 -F0x900 - > $temp1\n";
+            print BASH "bwa mem -v 1 -t $opt_n $opt_d $f2 | samtools fasta -F4 -F0x900 - > $temp2\n";
+            print BASH "blastn -max_hsps 1 -max_target_seqs 1 -db $opt_d -query $temp1 -out $uso1 -evalue 10 -num_threads $opt_n -outfmt '6 qseqid sseqid'\n";
+            print BASH "blastn -max_hsps 1 -max_target_seqs 1 -db $opt_d -query $temp2 -out $uso2 -evalue 10 -num_threads $opt_n -outfmt '6 qseqid sseqid'\n";
+
+            ##new nucl database
+        } else {
+            die "Cannot detect the type of the Database, please run makedb (prot) or makeblastdb (nucl) first!\n"
+        }
+    }
+
+    ##extract potential reads for each sample
+    my $e1fa = "$opt_o/$samples{$fq}.extract_1.fa";
+    my $e2fa = "$opt_o/$samples{$fq}.extract_2.fa";
+    print BASH "$ublastxdir/bin/extract_usearch_reads.pl $uso1 $f1 $e1fa\n";
+    print BASH "$ublastxdir/bin/extract_usearch_reads.pl $uso2 $f2 $e2fa\n";
+
+    ## skip if necessary
+    if($opt_s eq 'False'){
+        my $us161 = "$opt_o/$samples{$fq}.16s_1.fa";
+        my $us162 = "$opt_o/$samples{$fq}.16s_2.fa";
+        my $us161blast = "$opt_o/$samples{$fq}.16s_1.blast";
+        my $us162blast = "$opt_o/$samples{$fq}.16s_2.blast";
+            
+        ##do usearch against greengene nr90 database to calculate 16S copies number
+        print BASH "bwa mem -v 1 -t $opt_n $ggnr85 $f1 | samtools fasta -F4 -F0x900 - > $us161\n";
+        print BASH "bwa mem -v 1 -t $opt_n $ggnr85 $f2 | samtools fasta -F4 -F0x900 - > $us162\n";
+
+        print BASH "blastn -max_hsps 1 -max_target_seqs 1 -db $ggnr85blast -query $us161 -out $us161blast -evalue $eval1 -outfmt '6 qseqid sseqid length slen' -num_threads $opt_n\n";
+        print BASH "blastn -max_hsps 1 -max_target_seqs 1 -db $ggnr85blast -query $us162 -out $us162blast -evalue $eval1 -outfmt '6 qseqid sseqid length slen' -num_threads $opt_n\n";
+
+        ##Obtain microbial community by 16S hyper variable informaton in shotgun metagenomics data
+        ##using the USCMGs method to get the cell number 
+        my $dmd1out = "$opt_o/$samples{$fq}.uscmg_1.dmd";   
+        my $dmd2out = "$opt_o/$samples{$fq}.uscmg_2.dmd";
+        my $dmout = "$opt_o/$samples{$fq}.uscmg.blastx.txt";
+        
+        print BASH "diamond blastx --quiet -q $f1 -d $KO30DMD -o $dmd1out -f tab  -p $opt_n -e $eval2 --id $did --query-cover $opt_w --max-target-seqs 1\n";        
+        print BASH "diamond blastx --quiet -q $f2 -d $KO30DMD -o $dmd2out -f tab  -p $opt_n -e $eval2 --id $did --query-cover $opt_w --max-target-seqs 1\n";        
+        print BASH "cat $dmd1out $dmd2out > $dmout\n";
+        
+    }
 }##for process each sample separately
 
 ##--------------------------------------------------------------------------------------------------------
@@ -272,7 +252,7 @@ my $metaout = "$opt_o/meta_data_online.txt";
 my $extractfa = "$opt_o/extracted.fa";
 #option -c do copy number correction
 
-print BASH "$ublastxdir/bin/merge_extracted_fa_update_metadate.pl $opt_i $opt_o $opt_m $metaout $extractfa U $genekolist\n";
+print BASH "$ublastxdir/bin/merge_extracted_fa_update_metadate.pl $opt_i $opt_o $opt_m $metaout $extractfa U $genekolist $opt_s\n";
 
 close BASH;
 
