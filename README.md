@@ -15,7 +15,7 @@ conda create -n args_oap -c bioconda -c conda-forge xinehc::args_oap=3.1.3
 conda activate args_oap
 ```
 
-Args_oap depends on `python>=3.7`, `diamond>=2.0.15`, `bwa>=0.7.17`, `blast>=2.12`, `samtools>=1.15`, `fastp>=0.23.2`, `pandas`. If your OS has all the dependencies, then it can be built from source:
+Args_oap depends on `python>=3.7`, `diamond>=2.0.15`, `bwa>=0.7.17`, `blast>=2.12`, `samtools>=1.15`, `fastp`, `pandas`. If your OS has all the dependencies, then it can be built from source:
 ```bash
 git clone https://github.com/xinehc/args_oap.git
 cd args_oap
@@ -146,8 +146,9 @@ args_oap stage_two -i output/extracted.fa -m output/meta_data_online.txt -o outp
 
 ## Changes log
 
-#### Version 3.1.3 (29. August, 2022)
+#### Version 3.1.3 (30. August, 2022)
 + Update database to the release version (29082022 short).
++ Add parameter `-s` for skipping 16s/cells calculation in stageone.
 
 #### Version 3.1.2 (24. August, 2022)
 + Support customized database (testing).
