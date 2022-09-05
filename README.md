@@ -38,10 +38,10 @@ args_oap stage_two -i output/extracted.fa -m output/meta_data_online.txt -o outp
 
 After `stage_one`, a `meta_data_online.txt` file can be found in `output`. It summarizes the 16s and cell numbers of each samples, for example:
 
-| SampleID | Name     | Category | ReadLength | #ofReads | #of16Sreads      | CellNumber       |
-|----------|----------|----------|------------|----------|------------------|------------------|
-| 1        | STAS     | ST       | 100        | 200000   | 8.22929787979405 | 2.82910169634418 |
-| 2        | SWHAS104 | SWH      | 100        | 200000   | 7.00954780712517 | 3.16376328499407 |
+| SampleID | Name     | Category | #ofReads | #of16Sreads      | CellNumber       |
+|----------|----------|----------|----------|------------------|------------------|
+| 1        | STAS     | ST       | 200000   | 8.22929787979405 | 2.82910169634418 |
+| 2        | SWHAS104 | SWH      | 200000   | 7.00954780712517 | 3.16376328499407 |
 
 After `stagetwo`, the normalized ARGs copies per 16s/cells or hits/reads will be shown in several `*_normalized_*.txt` files. For example, `output.normalize_16s.type` means:
 + **normalized_16s** - normalized against 16s rRNA copies
