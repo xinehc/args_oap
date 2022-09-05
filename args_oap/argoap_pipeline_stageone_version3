@@ -186,6 +186,13 @@ for my $fq (sort {$a <=> $b } keys %samples){
         print BASH "diamond blastx --quiet -d $opt_d.dmnd -q $f1 -o $uso1 -e 10 -p $opt_n -k 1 --id 60 --query-cover 15\n";
         print BASH "diamond blastx --quiet -d $opt_d.dmnd -q $f2 -o $uso2 -e 10 -p $opt_n -k 1 --id 60 --query-cover 15\n";
 
+        ## create an empty file if uso2 not exists
+        unless(-f $uso2){
+            my $FILE;
+            open($FILE, ">>$uso2")||die("Cannot open file:".$!);
+            close($FILE);
+        }
+
     } else {
         if (-f "$opt_d.ndb") {
 
