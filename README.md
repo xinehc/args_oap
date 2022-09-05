@@ -23,7 +23,7 @@ python setup.py install # use python3 if needed
 ```
 
 ## Example
-Two examples (100k paired-end reads, 100 bp each) can be found [here](https://dl.dropboxusercontent.com/s/054ufvfahchfk7f/example.tar.gz). The zipped file can be downloaded manually or using `wget`:
+Two examples (100k paired-end reads, 100 bp each) can be found [here](https://dl.dropboxusercontent.com/s/3zg63ffn8pvensw/example.tar.gz). The zipped file can be downloaded manually or using `wget`:
 
 ```bash
 # conda install wget
@@ -78,10 +78,10 @@ Tips:
 
 The meta-data.txt shall look like this:
 
-SampleID | Name | Category |ReadLength  
----------|------|-------|----  
- 1       | STAS | ST       |100  
- 2       | SWHAS104 | SWH  |100  
+SampleID | Name | Category
+---------|------|-------
+ 1       | STAS | ST
+ 2       | SWHAS104 | SWH
 
 ### (optional) Stage two pipeline on Galaxy system and download results
 (The online version currently does not support SARG v3.0, we'd suggest to use the local version)
@@ -146,9 +146,10 @@ args_oap stage_two -i output/extracted.fa -m output/meta_data_online.txt -o outp
 
 ## Changes log
 
-#### Version 3.1.3 (30. August, 2022)
+#### Version 3.1.3 (09. September, 2022)
 + Update database to the release version (29082022 short).
 + Add parameter `-s` for skipping 16s/cells calculation in stageone.
++ Fix a bug when empty \_2 file is being used as input.
 
 #### Version 3.1.2 (24. August, 2022)
 + Support customized database (testing).
