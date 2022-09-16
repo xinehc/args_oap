@@ -127,6 +127,16 @@ if len(df) == 0:
     sys.exit(2)
 
 df = df[( df["pident"] >= identitymatch)  & ( df["evalue"] <= evaluematch)]
+
+## count max qlen
+perc = (df['qlen'] == df['qlen'].max()).sum()/len(df) * 100
+lenmatchabs = df['qlen'].max() * args.l / 100 /3 if dbtype =='prot' else df['qlen'].max() * args.l / 100
+if perc != 100:
+    logger.warning('Reads have uneven lengths, please double check.')
+logger.info('Read length: {} ({}%), alignment length cutoff: {}'.format(
+    df['qlen'].max(), perc, lenmatchabs))
+
+df = df[df['length'] >= lenmatchabs]
 df["scov"] = df["length"] / df["slen"] 
 df["qcov"] = df["length"] * 3 / df["qlen"] if dbtype == 'prot' else df["length"] / df["qlen"]
 df = df[df["qcov"] >= lenmatch]

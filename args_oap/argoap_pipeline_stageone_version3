@@ -51,8 +51,8 @@ $opt_f ||="fq";
 $opt_o ||= ".";
 $opt_x ||= 1e-10;
 $opt_y ||= 3;
-$opt_v ||= 40;
-$opt_w ||= 65;
+$opt_v ||= 45;
+$opt_w ||= 0;
 $opt_d ||= "$ublastxdir/DB/SARG.fasta"; ## This option is to replace the version of database, such as new and old SARG database, or other heirachical database with similar format 
 
 my $eval1 =$opt_x;
