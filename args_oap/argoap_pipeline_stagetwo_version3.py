@@ -134,7 +134,7 @@ df = df[( df["pident"] >= identitymatch)  & ( df["evalue"] <= evaluematch)]
 
 ## count max qlen
 perc = (df['qlen'] == df['qlen'].max()).sum()/len(df) * 100
-lenmatchabs = args.a if dbtype =='prot' else args.a/3
+lenmatchabs = args.a if dbtype =='prot' else args.a * 3
 if perc != 100:
     logger.warning('Reads have uneven lengths, please double check.')
 
