@@ -42,7 +42,8 @@ def parse_options(argv):
     optional_two = parser_stage_two.add_argument_group('OPTIONAL')
     optional_two.add_argument('-n', help='number of threads used for blastx, default 1', default=1)
     optional_two.add_argument('-b', help='if set then process the blastx results directly [default off], useful if user want to accelerate the stage two by running blastx paralell', default=False)
-    optional_two.add_argument('-l', help='length filtering default 75 percent', default=75)
+    optional_two.add_argument('-l', help='relative aligned length filtering default 75 percent', default=75)
+    optional_two.add_argument('-a', help='absolute aligned length filtering default 25', default=25)
     optional_two.add_argument('-e', help='evalue cutoff, default 1e-7', default=1e-7)
     optional_two.add_argument('-d', help='identity cutoff, default 80', default=80)
 

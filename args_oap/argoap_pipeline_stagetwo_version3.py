@@ -28,6 +28,10 @@ parser.add_argument('-l',
                     help="length filtering default 75 percent",
                     metavar="75",
                     default="75", type=float)
+parser.add_argument('-a',
+                    help="absolute length filtering default 25",
+                    metavar="25",
+                    default="25", type=float)
 parser.add_argument("-e",
                     help="evalue filtering default 1e-7",
                     type=float, default='1e-7',metavar='1e-7')
@@ -130,16 +134,18 @@ df = df[( df["pident"] >= identitymatch)  & ( df["evalue"] <= evaluematch)]
 
 ## count max qlen
 perc = (df['qlen'] == df['qlen'].max()).sum()/len(df) * 100
-lenmatchabs = df['qlen'].max() * args.l / 100 /3 if dbtype =='prot' else df['qlen'].max() * args.l / 100
+lenmatchabs = args.a if dbtype =='prot' else args.a/3
 if perc != 100:
     logger.warning('Reads have uneven lengths, please double check.')
-logger.info('Read length: {} ({}%), alignment length cutoff: {}'.format(
-    df['qlen'].max(), perc, lenmatchabs))
+
+logger.info('Read length: {} ({}%), absolute alignment length cutoff in aa: {}'.format(
+    df['qlen'].max(), perc, args.a))
 
 df = df[df['length'] >= lenmatchabs]
 df["scov"] = df["length"] / df["slen"] 
 df["qcov"] = df["length"] * 3 / df["qlen"] if dbtype == 'prot' else df["length"] / df["qlen"]
 df = df[df["qcov"] >= lenmatch]
+
 df = df.sort_values(["qseqid", "evalue", "bitscore", "length"], ascending=[True, True, False, False])
 df = df.drop_duplicates(subset='qseqid', keep="first")
 df['Name'] = df['qseqid'].str.rsplit('_', 1).str.get(0)

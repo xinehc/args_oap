@@ -14,6 +14,7 @@ def stage_two(options):
     '-m', options.m,
     '-n', str(options.n),
     '-l', str(options.l),
+    '-a', str(options.a),
     '-e', str(options.e),
     '-d', str(options.d),
     '-db',options.db,
