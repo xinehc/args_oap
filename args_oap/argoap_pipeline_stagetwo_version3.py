@@ -170,19 +170,16 @@ if not all(x in set(struc[levels[0]]) for x in df["sseqid"].unique()):
 result = pd.merge(df, struc, left_on = 'sseqid', right_on = levels[0], how = 'inner')
 result['scov'] = result['scov'] * result['count'] # account for different weight
 
-## calculate normalizer for rpkm
-tmp = result.groupby('Name')['count'].sum().reset_index().rename(columns={'count':'total_count'})
-
 ## calculate length normalized count
 result['rpk'] = result['count']/ (result['slen'] / 1000)
 
 logger.info("Saving output files ...")
 for level in levels:
     for measure, normalizer, name in zip(['scov', 'scov', 'count', 'rpk'], 
-                                         ['CellNumber', '#of16Sreads', '#ofReads', 'total_count'],
+                                         ['CellNumber', '#of16Sreads', '#ofReads', '#ofReads'],
                                          ['normalize_cellnumber', 'normalize_16s', 'ppm', 'fpkm']):
         agg = result.groupby([level, 'Name'])[measure].sum().reset_index()
-        out = pd.merge(pd.merge(agg, meta, on = 'Name', how ='outer'), tmp, on ='Name', how='outer')
+        out = pd.merge(agg, meta, on = 'Name', how ='outer')
         out['value'] = out[measure]/out[normalizer]
         if measure in {'ppm', 'fpkm'}:
             out['value'] = out['value'] * 1e6

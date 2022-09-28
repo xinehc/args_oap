@@ -170,7 +170,7 @@ for my $ids (sort {$a <=> $b}  keys %sampleid){
         my $count = 1;
         while(my $ntem = <TEM1>){
             my $stem = <TEM1>;
-            my $changename = ">$sampleid{$ids}_$count"."@".substr($ntem, 1, -1);
+            my $changename = ">$sampleid{$ids}_$count"."\@1@".substr($ntem, 1, -1);
             print TT "$changename\n$stem";
             $count ++;
         }
@@ -178,7 +178,7 @@ for my $ids (sort {$a <=> $b}  keys %sampleid){
     
         while(my $ntem = <TEM2>){
             my $stem = <TEM2>;
-            my $changename = ">$sampleid{$ids}_$count"."@".substr($ntem, 1, -1);
+            my $changename = ">$sampleid{$ids}_$count"."\@2@".substr($ntem, 1, -1);
             print TT "$changename\n$stem";
             $count ++;
         }
