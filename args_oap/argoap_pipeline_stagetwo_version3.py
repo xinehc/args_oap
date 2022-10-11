@@ -175,14 +175,19 @@ result['rpk'] = result['count']/ (result['slen'] / 1000)
 
 logger.info("Saving output files ...")
 for level in levels:
-    for measure, normalizer, name in zip(['scov', 'scov', 'count', 'rpk'], 
-                                         ['CellNumber', '#of16Sreads', '#ofReads', '#ofReads'],
-                                         ['normalize_cellnumber', 'normalize_16s', 'ppm', 'fpkm']):
+    for measure, normalizer, name in zip(['scov', 'scov', 'count', 'rpk', 'rpk'], 
+                                         ['CellNumber', '#of16Sreads', '#ofReads', '#ofReads', '#ofReads'],
+                                         ['normalize_cellnumber', 'normalize_16s', 'ppm', 'fpkm', 'percentage']):
         agg = result.groupby([level, 'Name'])[measure].sum().reset_index()
         out = pd.merge(agg, meta, on = 'Name', how ='outer')
         out['value'] = out[measure]/out[normalizer]
-        if measure in {'ppm', 'fpkm'}:
+
+        if name in {'ppm', 'fpkm'}:
             out['value'] = out['value'] * 1e6
+
+        if name in {'percentage'}:
+            out = pd.merge(out, out.groupby('Name')['value'].sum().reset_index(), on='Name')
+            out['value'] = out['value_x'] / out['value_y']
 
         out.set_index(level).pivot(columns = 'Name', values = 'value').fillna(0).sort_index().to_csv(
             str(args.o) + '.' + name + '.' + level + '.txt', sep ='\t') 
