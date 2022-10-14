@@ -32,8 +32,8 @@ my  $usage = <<USE;
     -z whether the fq files were .gz format, if -z, then firstly gzip -d, default (none) 
     -x evalue for searching 16S in usearch default 1e-10
     -y evalue for searching universal single copy marker gene default 3
-    -v the identity value for diamond to search the USCMGs default 40
-    -w the query cover value for diamond to search the USCMGs default 65
+    -v the identity value for diamond to search the USCMGs default 45
+    -w the query cover value for diamond to search the USCMGs default 0
     -db database, default SARG database
     -skip skip 16s and cell number calculation
     -h print this help information

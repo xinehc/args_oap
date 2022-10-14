@@ -15,7 +15,7 @@ conda create -n args_oap -c bioconda -c conda-forge xinehc::args_oap=3.1.4
 conda activate args_oap
 ```
 
-Args_oap depends on `python>=3.7`, `diamond>=2.0.15`, `bwa>=0.7.17`, `blast>=2.12`, `samtools>=1.15`, `fastp`, `pandas`. If your OS has all the dependencies, then it can be built from source:
+Args_oap depends on `python>=3.8`, `diamond>=2.0.15`, `bwa>=0.7.17`, `blast>=2.12`, `samtools>=1.15`, `fastp`, `pandas`. If your OS has all the dependencies, then it can be built from source:
 ```bash
 git clone https://github.com/xinehc/args_oap.git
 cd args_oap
@@ -23,16 +23,16 @@ python setup.py install # use python3 if needed
 ```
 
 ## Example
-Two examples (100k paired-end reads, 100 bp each) can be found [here](https://dl.dropboxusercontent.com/s/3zg63ffn8pvensw/example.tar.gz). The zipped file can be downloaded manually or using `wget`:
+Two examples (100k paired-end reads, 100 bp each) can be found [here](https://dl.dropboxusercontent.com/s/hupews7mwkobd62/example.tar.gz). The zipped file can be downloaded manually or using `wget`:
 
 ```bash
 # conda install wget
-wget https://dl.dropboxusercontent.com/s/054ufvfahchfk7f/example.tar.gz
+wget https://dl.dropboxusercontent.com/s/hupews7mwkobd62/example.tar.gz
 tar -xvf example.tar.gz
 cd example
 
 # conda activate args_oap
-args_oap stage_one -i inputfqs -m meta-data.txt -o output -f fa -n 8
+args_oap stage_one -i input -m meta-data.txt -o output -f fa -n 8
 args_oap stage_two -i output/extracted.fa -m output/meta_data_online.txt -o output/output -n 8
 ```
 
@@ -40,8 +40,8 @@ After `stage_one`, a `meta_data_online.txt` file can be found in `output`. It su
 
 | SampleID | Name     | Category | #ofReads | #of16Sreads      | CellNumber       |
 |----------|----------|----------|----------|------------------|------------------|
-| 1        | STAS     | ST       | 200000   | 8.22929787979405 | 2.82910169634418 |
-| 2        | SWHAS104 | SWH      | 200000   | 7.00954780712517 | 3.16376328499407 |
+| 1        | STAS     | ST       | 200000   | 8.22929787979405 | 3.14556802631011 |
+| 2        | SWHAS104 | SWH      | 200000   | 7.00954780712517 | 3.52042388092941 |
 
 After `stagetwo`, the normalized ARGs copies per 16s/cells or hits/reads will be shown in several `*_normalized_*.txt` files. For example, `output.normalize_16s.type` means:
 + **normalized_16s** - normalized against 16s rRNA copies
@@ -52,8 +52,8 @@ After `stagetwo`, the normalized ARGs copies per 16s/cells or hits/reads will be
 | aminoglycoside                      | 0.016202273302162954  | 0.07023487211759523  |
 | bacitracin                          | 0.014243756749154245  | 0.036478430517533605 |
 | beta_lactam                         | 0.0                   | 0.07424208305458768  |
-| macrolide-lincosamide-streptogramin | 0.0                   | 0.011958685753535675 |
-| multidrug                           | 0.004916222011260065  | 0.0965372568252277   |
+| macrolide-lincosamide-streptogramin | 0.0                   | 0.011963015532727397 |
+| multidrug                           | 0.003734303663944131  | 0.09247865835931474  |
 | mupirocin                           | 0.002966724847808158  | 0.004557467877130285 |
 | quinolone                           | 0.14468645528642882   | 0.043998731935285834 |
 | sulfonamide                         | 0.01345207192984009   | 0.06808763199694169  |
@@ -143,8 +143,13 @@ args_oap stage_one -i inputfqs -m meta-data.txt -o output -f fa -n 8 -db databas
 args_oap stage_two -i output/extracted.fa -m output/meta_data_online.txt -o output/output -n 8 -db database.fasta -struc1 structure.txt
 ```
 
-
 ## Changes log
+
+#### Version 3.1.4
++ Remove a duplicated gene ID (ARCH67_P638154538) in KO30 name list
++ Add RPKM/TPM normalization
++ Support bioconda installation
+
 
 #### Version 3.1.3 (09. September, 2022)
 + Update database to the release version (29082022 short).

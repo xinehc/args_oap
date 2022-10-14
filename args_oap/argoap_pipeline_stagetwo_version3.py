@@ -148,13 +148,13 @@ df = df[df["qcov"] >= lenmatch]
 
 df = df.sort_values(["qseqid", "evalue", "bitscore", "length"], ascending=[True, True, False, False])
 df = df.drop_duplicates(subset='qseqid', keep="first")
-df['Name'] = df['qseqid'].str.rsplit('_', 1).str.get(0)
+df['Name'] = df['qseqid'].str.rsplit(pat='_', n=1).str.get(0)
 df['sseqid'] = df['sseqid'].astype(str)
 
 ### process SARG structure
 if 'DB/single-component_structure.txt' in args.struc1:
     struc_list = []
-    for file, count in zip([args.struc1, args.struc2, args.struc3], [1, 0.333, 0.5]):
+    for file, count in zip([args.struc1, args.struc2, args.struc3], [1, 1/3, 1/2]):
         struc_list.append(pd.read_csv(file, sep="\t", dtype = str).assign(count = count))
     struc = pd.concat(struc_list, ignore_index=True)
 else:
@@ -177,15 +177,15 @@ logger.info("Saving output files ...")
 for level in levels:
     for measure, normalizer, name in zip(['scov', 'scov', 'count', 'rpk', 'rpk'], 
                                          ['CellNumber', '#of16Sreads', '#ofReads', '#ofReads', '#ofReads'],
-                                         ['normalize_cellnumber', 'normalize_16s', 'ppm', 'fpkm', 'percentage']):
+                                         ['normalize_cellnumber', 'normalize_16s', 'ppm', 'rpkm', 'tpm']):
         agg = result.groupby([level, 'Name'])[measure].sum().reset_index()
         out = pd.merge(agg, meta, on = 'Name', how ='outer')
         out['value'] = out[measure]/out[normalizer]
 
-        if name in {'ppm', 'fpkm'}:
+        if name in {'ppm', 'rpkm'}:
             out['value'] = out['value'] * 1e6
 
-        if name in {'percentage'}:
+        if name in {'tpm'}:
             out = pd.merge(out, out.groupby('Name')['value'].sum().reset_index(), on='Name')
             out['value'] = out['value_x'] / out['value_y']
 
