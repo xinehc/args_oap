@@ -4276,7 +4276,6 @@ gi|488216250|ref|WP_002287458.1|	macrolide-lincosamide-streptogramin__msr(C)	mac
 gi|488231473|ref|WP_002302681.1|	macrolide-lincosamide-streptogramin__msr(C)	macrolide-lincosamide-streptogramin
 gi|488247627|ref|WP_002318835.1|	macrolide-lincosamide-streptogramin__msr(C)	macrolide-lincosamide-streptogramin
 gi|488321355|ref|WP_002390740.1|	macrolide-lincosamide-streptogramin__msr(C)	macrolide-lincosamide-streptogramin
-gb|ACB05808.1|ARO:3003109|msrE	macrolide-lincosamide-streptogramin__msr(E)	macrolide-lincosamide-streptogramin
 QHW12308.1	macrolide-lincosamide-streptogramin__msr(F)	macrolide-lincosamide-streptogramin
 DAC81085.1	macrolide-lincosamide-streptogramin__msr(H)	macrolide-lincosamide-streptogramin
 gb|AKA86814|ARO:3003746|optrA	macrolide-lincosamide-streptogramin__optrA	macrolide-lincosamide-streptogramin
@@ -4499,7 +4498,6 @@ CAB96926	macrolide-lincosamide-streptogramin__mph(C)	macrolide-lincosamide-strep
 CAJ51087	macrolide-lincosamide-streptogramin__mph(C)	macrolide-lincosamide-streptogramin
 CAL37101	macrolide-lincosamide-streptogramin__mph(C)	macrolide-lincosamide-streptogramin
 YP_001569069	macrolide-lincosamide-streptogramin__mph(C)	macrolide-lincosamide-streptogramin
-gb|ABI20451.1|ARO:3003741|mphE	macrolide-lincosamide-streptogramin__mph(E)	macrolide-lincosamide-streptogramin
 gb|CAJ98570.1|ARO:3003071|mphF	macrolide-lincosamide-streptogramin__mph(F)	macrolide-lincosamide-streptogramin
 gb|BAL43359.1|ARO:3003742|mphG	macrolide-lincosamide-streptogramin__mph(G)	macrolide-lincosamide-streptogramin
 gb|ACU86041.1|ARO:3004539|mphH	macrolide-lincosamide-streptogramin__mph(H)	macrolide-lincosamide-streptogramin
