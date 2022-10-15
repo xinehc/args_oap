@@ -26,8 +26,8 @@ class Settings:
         self._sarg_structure2 = os.path.join(self._path, 'db', 'two-component_structure.txt')
         self._sarg_structure3 = os.path.join(self._path, 'db', 'multi-component_structure.txt')
         self._gg85 = os.path.join(self._path, 'db', 'gg85.fasta')
-        self._ko30 = os.path.join(self._path, 'db', 'all_KO30.fasta')
-        self._ko30_structure = os.path.join(self._path, 'db', 'all_KO30_name.list')
+        self._ko30 = os.path.join(self._path, 'db', 'ko30.fasta')
+        self._ko30_structure = os.path.join(self._path, 'db', 'ko30_structure.txt')
         self.cols = ['qseqid', 'sseqid', 'pident', 'length', 'qlen', 'slen', 'evalue', 'bitscore'] # blast6 output format
 
 settings = Settings()
