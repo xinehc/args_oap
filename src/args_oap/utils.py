@@ -2,41 +2,41 @@ import subprocess
 import os
 import sys
 import re
+import gzip 
 
 from .settings import logger
 
 def get_filename(file, format, drop=False):
     if drop:
-        return re.sub(rf'(_1|_2)?\.{format}$','',os.path.basename(file))
+        return re.sub(rf'(_1|_2)?\.{format}(.gz)?$','',os.path.basename(file))
     else:
-        return re.sub(rf'\.{format}$','',os.path.basename(file))
+        return re.sub(rf'\.{format}(.gz)?$','',os.path.basename(file))
         
 ## https://stackoverflow.com/a/850962
 def buffer_count(file):
     nlines = 0
-    with open(file) as f:
-        char = f.read(1) # get first character, > or @
-        f.seek(0) # roll back
+    if re.search('.gz$', file):
+        f = gzip.open(file, 'rt')
+    else:
+        f = open(file)
 
-        buf_size = 1024 * 1024
-        read_f = f.read
-        
+    buf_size = 1024 * 1024
+    read_f = f.read
+    
+    buf = read_f(buf_size)
+    while buf:
+        nlines += buf.count('>')
         buf = read_f(buf_size)
-        while buf:
-            nlines += buf.count(char)
-            buf = read_f(buf_size)
 
+    f.close()
     return nlines
 
 def simple_count(file):
     nbps = 0
     nlines = 0
     with open(file, 'r') as f:
-        char = f.read(1) # get first character, > or @
-        f.seek(0) # roll back
-
         for line in f:
-            if line[0]!=char:
+            if line[0]!='>':
                 nbps += len(line) - 1
             else:
                 nlines += 1
