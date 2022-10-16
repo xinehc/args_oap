@@ -14,52 +14,54 @@ class StageOne:
         self._extracted = os.path.join(self.outdir, 'extracted.fa')
         self._metadata = os.path.join(self.outdir, 'metadata.txt')
 
-        self.ko30 = pd.read_table(settings._ko30_structure, header=None, names=['sseqid', 'ko30_name', 'ko30_length'])
-        self.files = glob(os.path.join(self.indir, '*.' + self.format))
+        self.ko30 = pd.read_table(settings._ko30_structure, header=None, names=['sseqid', 'ko30'])
+        self.files = glob(os.path.join(self.indir, '*.' + self.format)) + glob(os.path.join(self.indir, '*.' + self.format + '.gz'))
 
-        ## sanity check
+        ## if indir does not exist
         if not os.path.isdir(self.indir):
-            logger.critical('Input folder <{}> does not exist.'.format(self.indir))
+            logger.critical('Input folder <{}> does not exist. Please check input folder (-i/--indir).'.format(self.indir))
             sys.exit(2)
-
-        if len(self.files)==0:
-            logger.critical('No file <*.{}> found in input folder <{}>. Please check the formats and change -f.'.format(self.format, self.indir))
-            sys.exit(2)
-
-        if os.path.isdir(self.outdir):
-            logger.warning('Output folder <{}> exists, overwrite all files.'.format(self.outdir))
-            for file in [self._extracted, self._metadata]:
-                if os.path.isfile(file):
-                    os.remove(file)
         else:
-            os.makedirs(self.outdir, exist_ok=True)
+            ## if glob no files in indir
+            if len(self.files)==0:
+                logger.critical('No <*.{}> or <*.{}.gz> file found in input folder <{}>. Please check input folder (-i/--indir) or format (-f/--format).'.format(self.format, self.format, self.indir))
+                sys.exit(2)
+
+        ## if outdir same as indir
+        if self.indir == self.outdir:
+            logger.critical('Folder for input/output cannot be identical. Please check input folder (-i/--indir) or output folder (-o/--outdir).')
+            sys.exit(2)
+
+        ## if extracted.fa or metadata.txt exists in outdir, raise warning that they will be overwritten
+        os.makedirs(self.outdir, exist_ok=True)
+        if os.path.isfile(self._extracted) or os.path.isfile(self._metadata):
+            logger.warning('Output folder <{}> contains <extracted.fa> and/or <metadata.txt>, they/it will be overwritten.'.format(self.outdir))
+            for file in [self._extracted, self._metadata]:
+                try:
+                    os.remove(file)
+                except OSError:
+                    pass
 
         ## first time running, build database manually
         if not os.path.isfile(settings._gg85+'.ndb') or not os.path.isfile(settings._ko30+'.pdb') or not os.path.isfile(settings._sarg+'.pdb'):
             logger.info('Building databases ...')
-            logger.disabled = True
+            logger.disabled = True # skip logging
             for file in [settings._gg85, settings._ko30, settings._sarg]:
                 make_db(file)
             logger.disabled = False
 
-        ## database related
+        ## database check
         if os.path.isfile(self._db + '.pdb'):
             self._dbtype = 'prot'
         elif os.path.isfile(self._db + '.ndb'):
             self._dbtype = 'nucl'
         else:
-            logger.critical('Cannot load database <{}>.'.format(self._db))
+            logger.critical('Cannot find database <{}>. Please run <make_db> first or check database (--database)'.format(self._db))
             sys.exit(2)
-
-    def count_reads(self, file):
-        '''
-        Count reads (headers) of a fa/fq file.
-        '''
-        return buffer_count(file)
 
     def count_16s(self, file):
         '''
-        Extract 16s (Greengenes 16S rRNA Database 85%) reads using bwa (pre-filtering) and blastn (post-filtering).
+        Extract 16S (GreenGenes 16S rRNA Database 85%) reads using bwa (pre-filtering) and blastn (post-filtering).
         '''
         filename = get_filename(file, self.format)
         _tmp_16s_fa = os.path.join(self.outdir, filename + '.16s.fa.tmp')
@@ -88,21 +90,20 @@ class StageOne:
             '-num_threads', str(self.thread)], check=True, stderr=subprocess.DEVNULL)
 
         ## process blastn results, store subject cover
-        try:
-            df = pd.read_table(_tmp_16s_txt, header=None, names=settings.cols)
+        df = pd.read_table(_tmp_16s_txt, header=None, names=settings.cols)
+        if len(df)==0:
+            logger.warning("No 16S-like sequences found in file <{}>.".format(file))
+            return 0
+        else:
             df['scov'] = df['length'] / df['slen']
             if df['qseqid'].duplicated().sum()>0:
-                logger.warning('Duplicated qseqid in 16s.')
+                logger.warning('Duplicated qseqid in 16S.')
                 df = df[~df['qseqid'].duplicated()]
-                
             return df['scov'].sum()
-        except:
-            logger.warning("No 16s-like sequences found in file <{}>.".format(file))
-            return 0
 
     def count_cells(self, file):
         '''
-        Count Universial Essencial Single Copy Marker Genes (cells) using diamond.
+        Count Essential Single Copy Marker Genes (cells) using diamond.
         '''
         filename = get_filename(file, self.format)
         _tmp_cells_txt = os.path.join(self.outdir, filename + '.cells.txt.tmp')
@@ -117,22 +118,22 @@ class StageOne:
             '--evalue', str(self.e2), 
             '--id', str(self.id), 
             '--query-cover', str(self.qcov), 
+            '--max-hsps', '1',
             '--max-target-seqs', '1', 
             '--threads', str(self.thread), 
             '--quiet'], check=True)
 
         ## process blastx results, store subject coverage
-        try:
-            df = pd.read_table(_tmp_cells_txt, header=None, names=settings.cols)
-            df = pd.merge(df, self.ko30, on='sseqid', how='left')
-            if df['qseqid'].duplicated().sum()>0:
-                logger.warning('Duplicated qseqid in cells.')
-                df = df[~df['qseqid'].duplicated()]
-
-            return df.groupby('ko30_name').apply(lambda x: sum(x['length'] / x['ko30_length'])).sum()/30
-        except:
+        df = pd.read_table(_tmp_cells_txt, header=None, names=settings.cols)
+        if len(df)==0:
             logger.warning("No cells-like sequences found in file <{}>.".format(file))
             return 0
+        else:
+            df = pd.merge(df, self.ko30, on='sseqid', how='left')
+            if df['qseqid'].duplicated().sum()>0:
+                logger.warning('Duplicated qseqid in cells {}.'.format(_tmp_cells_txt))
+                df = df[~df['qseqid'].duplicated()]
+            return df.groupby('ko30').apply(lambda x: sum(x['length'] / x['slen'])).sum()/30
 
     def extract_seqs(self, file):
         '''
@@ -152,13 +153,14 @@ class StageOne:
                 '--evalue', '10', 
                 '--id', '60', 
                 '--query-cover', '15', 
+                '--max-hsps', '1',
                 '--max-target-seqs', '1', 
                 '--threads', str(self.thread), '--quiet'], check=True)
         else:
             subp = subprocess.run(['bwa', 'mem', '-t', str(self.thread), self._db, file], check=True, capture_output=True)
             subsubp = subprocess.run(['samtools', 'fasta', '-F4', '-F0x900', '-'], check=True, capture_output=True, input=subp.stdout)
 
-            ## convert sam to tab for later usage, note that reads can be duplicated
+            ## convert sam to tab for later usage
             with open(_tmp_seqs_txt, 'w') as f:
                 subprocess.run(['awk', 'BEGIN{RS=">";OFS="\t"}NR>1{print "#"$1,$2}'], check=True, input=subsubp.stdout, stdout=f)
 
@@ -169,8 +171,10 @@ class StageOne:
                 logger.warning('Duplicated qseqid in target sequences.')
                 df = df[~df['qseqid'].duplicated()]
 
-            for i, line in enumerate(df['full_qseq']):
-                f.write('>' + filename + '@' + str(i) + '\n' + line + '\n')
+            cnt = 0
+            for qseqid, full_qseq in zip(df['qseqid'], df['full_qseq']):
+                f.write('>' + filename + '@' + str(cnt) + '@' + qseqid + '\n' + full_qseq + '\n')
+                cnt += 1
 
     def run(self):
         metadata = []
@@ -178,15 +182,15 @@ class StageOne:
             logger.info('Processing <{}> ({}/{}) ...'.format(file, i+1, len(self.files)))
             self.extract_seqs(file)
 
-            ## skip 16s/cells calculation if necessary
+            ## skip 16S/cells calculation if necessary
             if not self.skip:
-                nreads=self.count_reads(file)
-                n16s=self.count_16s(file)
-                ncells=self.count_cells(file)
-                metadata.append([nreads,n16s,ncells, get_filename(file, self.format, drop=True)])
+                nread=buffer_count(file)
+                n16S=self.count_16s(file)
+                ncell=self.count_cells(file)
+                metadata.append([nread, n16S, ncell, get_filename(file, self.format, drop=True)])
 
         if metadata:
-            pd.DataFrame(metadata, columns=['nReads','n16s','nCells','Sample']).groupby('Sample').sum().to_csv(
+            pd.DataFrame(metadata, columns=['nRead','n16S','nCell','Sample']).groupby('Sample').sum().to_csv(
                 self._metadata, sep='\t')
 
         if not self.keep:
