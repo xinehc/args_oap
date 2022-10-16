@@ -60,7 +60,7 @@ def make_db(file):
     Make database. The type of the database will be determined based on diamond'd return code.
     '''
     if not os.path.isfile(file):
-        logger.critical('File <{}> cannot be found'.format(file))
+        logger.critical('File <{}> cannot be found. Please check input file (-i/--infile).'.format(file))
         sys.exit(2)
 
     logger.info('Building database of <{}> ...'.format(file))
