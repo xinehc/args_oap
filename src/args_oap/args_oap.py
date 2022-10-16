@@ -22,12 +22,12 @@ def parse_options(argv):
     required.add_argument('-o', '--outdir', required=True, metavar='DIR', help='Output folder.')
 
     optional.add_argument('-t', '--thread', metavar='INT', help='Threads. [8]', default=8, type=int)
-    optional.add_argument('-f', '--format', metavar='FORMAT', help='Format (extension) of files in input folder (--indir). [fq]', default='fq')
-    optional.add_argument('--e1', metavar='FLOAT', help='E-value cutoff for Greengenes. [1e-10]', default=1e-10, type=float)
-    optional.add_argument('--e2', metavar='FLOAT', help='E-value cutoff for Universal Essential Single Copy Marker Genes. [3]', default=3, type=float)
-    optional.add_argument('--id', metavar='FLOAT', help='Identity cutoff (in percentage) for Universal Essential Single Copy Marker Genes. [40]', default=40, type=float)
-    optional.add_argument('--qcov', metavar='FLOAT', help='Query cover cutoff (in percentage) for Universal Essential Single Copy Marker Genes. [65]', default=65, type=float)
-    optional.add_argument('--skip', help='Skip cell number and 16s calculation.', action='store_true')
+    optional.add_argument('-f', '--format', metavar='EXT', help='Format (extension) of files in input folder (--indir), gzipped (*.gz) optional. [fq]', default='fq')
+    optional.add_argument('--e1', metavar='FLOAT', help='E-value cutoff for GreenGenes. [1e-10]', default=1e-10, type=float)
+    optional.add_argument('--e2', metavar='FLOAT', help='E-value cutoff for Essential Single Copy Marker Genes. [3]', default=3, type=float)
+    optional.add_argument('--id', metavar='FLOAT', help='Identity cutoff (in percentage) for Essential Single Copy Marker Genes. [45]', default=45, type=float)
+    optional.add_argument('--qcov', metavar='FLOAT', help='Query cover cutoff (in percentage) for Essential Single Copy Marker Genes. [0]', default=0, type=float)
+    optional.add_argument('--skip', help='Skip cell number and 16S calculation.', action='store_true')
     optional.add_argument('--keep', help='Keep all temporary files (*.tmp) in the output folder (--outdir).', action='store_true')
 
     database.add_argument('--database', metavar='FILE', help='Customized database (indexed) other than SARG. [None]', default=None)
@@ -39,12 +39,15 @@ def parse_options(argv):
     optional = parser_stage_two.add_argument_group('optional arguments')
     database = parser_stage_two.add_argument_group('database arguments')
 
-    required.add_argument('-i', '--indir', required=True, metavar='DIR', help='Input folder. Should be the output folder of stageone (--outdir), and contain files "meta_data.txt" and "extracted.fa".')
+    required.add_argument('-i', '--indir', required=True, metavar='DIR', help='Input folder. Should be the output folder of stage_one (contain "meta_data.txt" and "extracted.fa").')
 
     optional.add_argument('-t', '--thread', metavar='INT', help='Threads. [8]', default=8, type=int)
+    optional.add_argument('-o', '--outdir', metavar='DIR', help='Output folder, if not given then samve as input folder (--indir). [None]', default=None)
     optional.add_argument('--e', metavar='FLOAT', help='E-value cutoff for target sequences. [1e-7]', default=1e-7, type=float)
     optional.add_argument('--id', metavar='FLOAT', help='Identity cutoff (in percentage) for target sequences. [80]', default=80, type=float)
     optional.add_argument('--qcov', metavar='FLOAT', help='Query cover cutoff (in percentage) for target sequences. [75]', default=75, type=float)
+    optional.add_argument('--length', metavar='INT', help='Aligned length cutoff (in amino acid) for target sequences. [25]', default=25, type=int)
+    optional.add_argument('--blastout', metavar='FILE', help='BLAST output (-outfmt "6 qseqid sseqid pident length qlen slen evalue bitscore"), if given then skip BLAST. [None]', default=None)
 
     database.add_argument('--database', metavar='FILE', help='Customized database (indexed) other than SARG. [None]', default=None)
     database.add_argument('--structure1', metavar='FILE', help='Customized structure file (weight 1, single-component). [None]', default=None)
@@ -62,11 +65,12 @@ def parse_options(argv):
     parser_make_db.set_defaults(func=run_make_db)
 
     ## print help
-    if len(argv) < 2:
+    if len(argv) < 2 or argv[1] not in {'stage_one', 'stage_two', 'make_db', '-h', '-v'}:
         parser.print_help()
         sys.exit(0)
-    elif argv[1] not in {'stage_one', 'stage_two', 'make_db', '-h'}:
-        parser.print_help()
+
+    if argv[1] == '-v':
+        print(__version__)
         sys.exit(0)
 
     if len(argv) < 3:
