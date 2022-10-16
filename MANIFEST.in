@@ -1,5 +1,4 @@
 include README.md
 include LICENSE
 
-recursive-include args_oap/ *
 global-exclude *.DS_Store

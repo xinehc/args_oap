@@ -1,21 +1,21 @@
-# ARGs_OAP v3.1.4
+# ARGs_OAP v3.2
 This repository was created by Xiaole Yin (_xiaole99_) and is currently maintained by Xi Chen (_xinhec_). The goal is to make args_oap faster, and easier to run. 
 
-If you have any questions, please contact Xiaole Yin ([yinlele99@gmail.com](yinlele99@gmail.com)).
+If you have any questions, please create an [issue](https://github.com/xinehc/args_oap/issues/new/choose), or contact Xiaole Yin ([yinlele99@gmail.com](yinlele99@gmail.com)).
 
 ## Installation
-Conda (osx-64/linux-64):
+Conda (macOS/Linux):
 ```bash
-conda install -c bioconda -c conda-forge xinehc::args_oap=3.1.4
+conda install -c bioconda -c conda-forge xinehc::args_oap=3.2
 ```
 
-We'd suggest to create a new conda environment (here use `-n args_oap` as an example) to avoid potential conflicts of dependencies:
+We suggest to create a new conda environment (here use `-n args_oap` as an example) to avoid potential conflicts of dependencies:
 ```bash
-conda create -n args_oap -c bioconda -c conda-forge xinehc::args_oap=3.1.4
+conda create -n args_oap -c bioconda -c conda-forge xinehc::args_oap=3.2
 conda activate args_oap
 ```
 
-Args_oap depends on `python>=3.8`, `diamond>=2.0.15`, `bwa>=0.7.17`, `blast>=2.12`, `samtools>=1.15`, `fastp`, `pandas`. If your OS has all the dependencies, then it can be built from source:
+If your OS satisfies all the dependencies (`python>=3.8`, `diamond>=2.0.15`, `bwa>=0.7.17`, `blast>=2.12`, `samtools>=1.15`), then build from source:
 ```bash
 git clone https://github.com/xinehc/args_oap.git
 cd args_oap
@@ -23,68 +23,85 @@ python setup.py install # use python3 if needed
 ```
 
 ## Example
-Two examples (100k paired-end reads, 100 bp each) can be found [here](https://dl.dropboxusercontent.com/s/hupews7mwkobd62/example.tar.gz). The zipped file can be downloaded manually or using `wget`:
+Two example fasta files (100k paired-end reads, 100 bp each) can be found [here](https://dl.dropboxusercontent.com/s/ghva07srkairdww/example.tar.gz). The zipped file can be downloaded manually or using `wget`:
 
 ```bash
 # conda install wget
-wget https://dl.dropboxusercontent.com/s/hupews7mwkobd62/example.tar.gz
+wget https://dl.dropboxusercontent.com/s/ghva07srkairdww/example.tar.gz
 tar -xvf example.tar.gz
 cd example
 
 # conda activate args_oap
-args_oap stage_one -i input -m meta-data.txt -o output -f fa -n 8
-args_oap stage_two -i output/extracted.fa -m output/meta_data_online.txt -o output/output -n 8
+args_oap stage_one -i input -o output -f fa -t 8
+args_oap stage_two -i output -t 8
 ```
 
-After `stage_one`, a `meta_data_online.txt` file can be found in `output`. It summarizes the 16s and cell numbers of each samples, for example:
+After `stage_one`, a `metadata.txt` file can be found in `output`. It summarizes the 16s and cell numbers of each samples, for example:
 
-| SampleID | Name     | Category | #ofReads | #of16Sreads      | CellNumber       |
-|----------|----------|----------|----------|------------------|------------------|
-| 1        | STAS     | ST       | 200000   | 8.22929787979405 | 3.14556802631011 |
-| 2        | SWHAS104 | SWH      | 200000   | 7.00954780712517 | 3.52042388092941 |
+|Sample  |nRead |n16S             |nCell             |
+|--------|------|-----------------|------------------|
+|STAS    |200000|8.229297879794053|3.145703856125799 |
+|SWHAS104|200000|7.009547807125172|3.5116647568418156|
 
-After `stagetwo`, the normalized ARGs copies per 16s/cells or hits/reads will be shown in several `*_normalized_*.txt` files. For example, `output.normalize_16s.type` means:
-+ **normalized_16s** - normalized against 16s rRNA copies
-+ **type** - Type of ARGs (the hierarchy in SARG is type -> subtype -> gene)
+After `stage_two`, the normalized ARGs copies per 16S/cells or hits per million reads will be shown in several `*_normalized_*.txt` files. 
+For example, `normalized_16S.type` means:
++ `normalized_16S` - normalized against 16S rRNA copies
++ `type` - Type of ARGs (the hierarchy in SARG is type -> subtype -> gene)
 
-| Type                                | STAS                  | SWHAS104             |
-|-------------------------------------|-----------------------|----------------------|
-| aminoglycoside                      | 0.016202273302162954  | 0.06914804847025297  |
-| bacitracin                          | 0.014243756749154245  | 0.036478430517533605 |
-| beta_lactam                         | 0.0                   | 0.07424208305458768  |
-| macrolide-lincosamide-streptogramin | 0.0                   | 0.011963015532727397 |
-| multidrug                           | 0.004952224304989357  | 0.09644355990237402  |
-| mupirocin                           | 0.002966724847808158  | 0.004557467877130285 |
-| quinolone                           | 0.14468645528642882   | 0.043998731935285834 |
-| sulfonamide                         | 0.01345207192984009   | 0.06808763199694169  |
-| tetracycline                        | 0.004659396079993181  | 0.04969500656817938  |
+|type                               |STAS                 |SWHAS104            |
+|-----------------------------------|---------------------|--------------------|
+|aminoglycoside                     |0.016202273302162947 |0.06914804847025294 |
+|bacitracin                         |0.014243756749154238 |0.0364784305175336  |
+|beta_lactam                        |0.0                  |0.07424208305458765 |
+|macrolide-lincosamide-streptogramin|0.0                  |0.011963015532727394|
+|multidrug                          |0.004952224304989356 |0.096443559902374   |
+|mupirocin                          |0.0029667248478081566|0.004557467877130284|
+|quinolone                          |0.14468645528642876  |0.04399873193528583 |
+|sulfonamide                        |0.013452071929840085 |0.06808763199694166 |
+|tetracycline                       |0.004659396079993178 |0.04969500656817937 |
 
 ## Notes
-###  (mandatory) Prepare the meta-data.txt file
-(We hope to remove the manual meta-data.txt preparation step in future updates)
+### (optional) Customized database/structures
+To use customized databases (e.g. mobile genetic elements or heave metal resistant genes), you need to prepare two files:
+1. nucleotide sequences or amino acid (protein) sequences database (e.g. `database.fasta`)
+2. hierarchical structure file (e.g. `structure.txt`)
 
-To run the `stage_one` pipeline, you need to 
-1. Put all your paired-end fastq/fasta files into one directory (notice that the name of your fastq files should be Name_1.fq and Name_2.fq).  
-2. Prepare meta-data.txt file.  
+The database should be indexed manually (protein or nucleotide, in fasta):
+```bash
+## protein or nucleotide
+args_oap make_db -i database.fasta
+```
 
-Tips:
-* You need keep the first and second column's name as SampleID and Name  
-* The SampleID are required to be unique numbers counting from 1 to 2 to 3 etc.  
-* The meta-data table should be separated by tabular for each of the items   
-* The Name of each sample should be the fastq file names for your pair-end Illumina sequencing data, your fastq files will automatically be recognized by Name_1.fq and Name_2.fq, so you need to keep the name consistent with your fq file name. (if you files are end with .fastq or .fasta, you need to change them to end with .fq or .fa)  
-* Category is the classification of your samples into groups and we will colored your samples in PcoA by this information (*online stagetwo version only*, see below)
-   
-**Please make sure the meta-data file is in pure txt format, if you edit the file under windows, using notepad++ and check the end of each line by cliking View-> Show Symbol -> Show All Characters. If the line is end up with CRLF, please remove the CR by replace \r to nothing in the replace dialogue frame.**
+The structure file `structure.txt` should be tab-separated and the first column the sequences ID of `database.fasta` (**please note that the sequence ID cannot contain space, tab and other irregular char such as forward slash**). At lease one column (level 1) is required. For the one column (level 1) case, you may construct the structure file using:
+```bash
+echo '>level1' | cat - database.fasta | grep '^>' | cut -d ' ' -f 1 | cut -c2- > structure.txt
+```
 
-The meta-data.txt shall look like this:
+One example of the `database.fasta` and `structure.txt` is :
 
-SampleID | Name | Category
----------|------|-------
- 1       | STAS | ST
- 2       | SWHAS104 | SWH
+```
+database.fasta:
+
+    >seq1
+    ACGT...
+    >seq2
+    TGCA...
+
+structure.txt:
+
+    level1    level2    level3
+    seq1    subtype1    type1
+    seq2    subtype2    type2
+```
+
+To run args_oap with customized database:
+```bash
+args_oap stage_one -i input -o output -f fa -t 8 --database database.fasta
+args_oap stage_two -i output -t 8 --database database.fasta --structure1 structure.txt
+```
 
 ### (optional) Stage two pipeline on Galaxy system and download results
-(The online version currently does not support SARG v3.0, we'd suggest to use the local version)
+(**The online version currently does not support SARG v3.0, please use the local version at this moment.**)
 
 Go to http://smile.hku.hk/SARGs  and using the module ARG_OAP.    
   
@@ -101,59 +118,20 @@ After a while or so, you will notice that their are four files generated for you
   
 There are some questions raised by users, please refer to the [FAQ](https://github.com/biofuture/Ublastx_stageone/wiki/FAQ) for details. To run ARG OAP locally, users should download the source code into local computer system (Unix/Linux). Users can upload the generated files for stage two onto our Galaxy analysis platform (http://smile.hku.hk/SARGs) or use the local version of stage two script.
 
-
-### (optional) Customized database
-To use customized databases (e.g. mobile genetic elements), you need to prepare two files:
-1. nucleotide sequences or amino acid (protein) sequences database (e.g. database.fasta)
-2. hierarchical structure file (e.g. structure.txt)
-
-The database should be indexed manually (protein or nucleotide):
-```bash
-## protein
-diamond makedb --in database.fasta  -d database.fasta
-makeblastdb -in database.fasta -dbtype prot
-
-## nucleotide
-bwa index database.fasta
-makeblastdb -in database.fasta -dbtype nucl
-```
-
-The structure file should be tab-separated and the first column the header of sequences in database.fasta (please note that the header should not contains space, tab and other irregular char such as forward slash). At lease one column is required.
-
-One example is:
-
-```
-database.fasta:
-
-    >seq1
-    ACGT...
-    >seq2
-    TGCA...
-
-structure.txt:
-
-    level1  level2  level3
-    seq1    subtype1    type1
-    seq2    subtype2    type2
-```
-
-To run args_oap with customized database, use:
-```bash
-args_oap stage_one -i inputfqs -m meta-data.txt -o output -f fa -n 8 -db database.fasta
-args_oap stage_two -i output/extracted.fa -m output/meta_data_online.txt -o output/output -n 8 -db database.fasta -struc1 structure.txt
-```
-
 ## Changes log
+#### Version 3.2 (16. October, 2022)
++ Simplify interface.
++ Remove dependencies on manually entered `metadata.txt`.
++ Support bioconda installation.
 
-#### Version 3.1.4
-+ Remove a duplicated gene ID (ARCH67_P638154538) in KO30 name list
-+ Add RPKM/TPM normalization
-+ Support bioconda installation
-
+#### Version 3.1.4 (11. October, 2022)
++ Remove a duplicated gene ID (ARCH67_P638154538) in KO30 name list.
++ Remove gene msrE, mphE and some multidrug genes from database.
++ Add RPKM/TPM normalization.
 
 #### Version 3.1.3 (09. September, 2022)
 + Update database to the release version (29082022 short).
-+ Add parameter `-s` for skipping 16s/cells calculation in stageone.
++ Add parameter `-s` for skipping 16s/cells calculation in `stageone`.
 + Fix a bug when empty \_2 file is being used as input.
 
 #### Version 3.1.2 (24. August, 2022)
@@ -183,11 +161,11 @@ args_oap stage_two -i output/extracted.fa -m output/meta_data_online.txt -o outp
     + Fixed a bug in stageone that caused USCMG to be slightly overestimated.
     + Fixed a bug in stageone that caused parameters `-x` `-y` `-v` to be ignored.
 
----    
+---
 **Notice:**  
   
-This tools only provide the required scripts for ARGs-OAP1.0/2.0 pipeline  
-  
-This pipeline is distributed in the hope to achieve the aim of management of antibiotic resistant genes in envrionment, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.This pipeline is only allowed to be used for non-commercial and academic purpose.  
-  
-**The SARG database is distributed only freely used for academic prupose, any commercial use should require the agreement from the developer team.**   
+This tools only provide the required scripts for ARGs-OAP 3.0 pipeline
+
+This pipeline is distributed in the hope to achieve the aim of management of antibiotic resistant genes in environment, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.This pipeline is only allowed to be used for non-commercial and academic purpose.
+
+**The SARG database is distributed only freely used for academic purpose, any commercial use should require the agreement from the developer team.**
