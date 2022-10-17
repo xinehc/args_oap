@@ -6,16 +6,16 @@ If you have any questions, please create an [issue](https://github.com/xinehc/ar
 ## Installation
 Conda (macOS/Linux):
 ```bash
-conda install -c bioconda -c conda-forge xinehc::args_oap=3.2
+conda install -c bioconda -c conda-forge args_oap=3.2
 ```
 
 We suggest to create a new conda environment (here use `-n args_oap` as an example) to avoid potential conflicts of dependencies:
 ```bash
-conda create -n args_oap -c bioconda -c conda-forge xinehc::args_oap=3.2
+conda create -n args_oap -c bioconda -c conda-forge args_oap=3.2
 conda activate args_oap
 ```
 
-If your OS satisfies all the dependencies (`python>=3.8`, `diamond>=2.0.15`, `bwa>=0.7.17`, `blast>=2.12`, `samtools>=1.15`), then build from source:
+If your OS satisfies all the dependencies (`python>=3.7`, `diamond>=2.0.15`, `bwa>=0.7.17`, `blast>=2.12`, `samtools>=1.15`), then build from source:
 ```bash
 git clone https://github.com/xinehc/args_oap.git
 cd args_oap
