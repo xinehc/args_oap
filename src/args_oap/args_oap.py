@@ -3,16 +3,12 @@ import sys
 from argparse import ArgumentParser
 from .stage_one import run_stage_one
 from .stage_two import run_stage_two
-from .utils import *
+from .make_db import run_make_db
 from . import __version__
 
-def parse_options(argv):
-
-    parser = ArgumentParser(description='ARGs-OAP v{}:  online analysis pipeline for antibiotic resistance genes detection.'.format(__version__))
-    subparsers = parser.add_subparsers(help='descriptions', metavar='{stage_one, stage_two, make_db}')
-
-    ## stage_one parameters
-    parser_stage_one = subparsers.add_parser('stage_one', help='run stage_one pipeline')
+## stage_one parameters
+def parse_stage_one(parser):
+    parser_stage_one = parser.add_parser('stage_one', help='run stage_one pipeline')
 
     required = parser_stage_one.add_argument_group('required arguments')
     optional = parser_stage_one.add_argument_group('optional arguments')
@@ -33,8 +29,9 @@ def parse_options(argv):
     database.add_argument('--database', metavar='FILE', help='Customized database (indexed) other than SARG. [None]', default=None)
     parser_stage_one.set_defaults(func=run_stage_one)
 
-    ## stage_two parameters
-    parser_stage_two = subparsers.add_parser('stage_two', help='run stage_two pipeline')
+## stage_two parameters
+def parse_stage_two(parser):
+    parser_stage_two = parser.add_parser('stage_two', help='run stage_two pipeline')
     required = parser_stage_two.add_argument_group('required arguments')
     optional = parser_stage_two.add_argument_group('optional arguments')
     database = parser_stage_two.add_argument_group('database arguments')
@@ -56,13 +53,25 @@ def parse_options(argv):
     
     parser_stage_two.set_defaults(func=run_stage_two)
 
-    ## makedb parameters
-    parser_make_db = subparsers.add_parser('make_db', help='build customized database')
+## makedb parameters
+def parse_make_db(parser):
+    parser_make_db = parser.add_parser('make_db', help='build customized database')
     required = parser_make_db.add_argument_group('required arguments')
 
     required.add_argument('-i', '--infile', required=True, metavar='FILE', help='Database FASTA file. Can be either "nucleotide" or "protein".')
 
     parser_make_db.set_defaults(func=run_make_db)
+
+def main(argv=sys.argv):
+    '''entry point'''
+
+    parser = ArgumentParser(description='ARGs-OAP v{}:  online analysis pipeline for antibiotic resistance genes detection.'.format(__version__))
+    subparsers = parser.add_subparsers(help='descriptions', metavar='{stage_one, stage_two, make_db}')
+
+    ## attach parsers
+    parse_stage_one(subparsers)
+    parse_stage_two(subparsers)
+    parse_make_db(subparsers)
 
     ## print help
     if len(argv) < 2 or argv[1] not in {'stage_one', 'stage_two', 'make_db', '-h', '-v'}:
@@ -75,19 +84,16 @@ def parse_options(argv):
 
     if len(argv) < 3:
         if argv[1] == 'stage_one':
-            parser_stage_one.print_help()
+            subparsers.choices['stage_one'].print_help()
         elif argv[1] == 'stage_two':
-            parser_stage_two.print_help()
+            subparsers.choices['stage_two'].print_help()
         elif argv[1] == 'make_db':
-            parser_make_db.print_help()
+            subparsers.choices['make_db'].print_help()
         else:
             parser.print_help()
         sys.exit(0)
-    return(parser.parse_args(argv[1:]))
 
-def main(argv=sys.argv):
-
-    options = parse_options(argv)
+    options = parser.parse_args(argv[1:])
     options.func(options)
 
 if __name__ == '__main__':
