@@ -6,12 +6,12 @@ If you have any questions, please create an [issue](https://github.com/xinehc/ar
 ## Installation
 Conda (macOS/Linux):
 ```bash
-conda install -c bioconda -c conda-forge args_oap=3.2
+conda install -c bioconda -c conda-forge args_oap
 ```
 
 We suggest to create a new conda environment (here use `-n args_oap` as an example) to avoid potential conflicts of dependencies:
 ```bash
-conda create -n args_oap -c bioconda -c conda-forge args_oap=3.2
+conda create -n args_oap -c bioconda -c conda-forge args_oap
 conda activate args_oap
 ```
 
@@ -23,11 +23,11 @@ python setup.py install # use python3 if needed
 ```
 
 ## Example
-Two example fasta files (100k paired-end reads, 100 bp each) can be found [here](https://dl.dropboxusercontent.com/s/ghva07srkairdww/example.tar.gz). The zipped file can be downloaded manually or using `wget`:
+Two example fasta files (100k paired-end reads, 100 bp each) can be found [here](https://dl.dropboxusercontent.com/s/pqgftlo24rfc2rd/example.tar.gz). The zipped file can be downloaded manually or using `wget`:
 
 ```bash
 # conda install wget
-wget https://dl.dropboxusercontent.com/s/ghva07srkairdww/example.tar.gz
+wget https://dl.dropboxusercontent.com/s/pqgftlo24rfc2rd/example.tar.gz
 tar -xvf example.tar.gz
 cd example
 
@@ -61,6 +61,17 @@ For example, `normalized_16S.type` means:
 |tetracycline                       |0.004659396079993178 |0.04969500656817937 |
 
 ## Notes
+### (optional) Single/Paired end files
+If you use paired-end files, please make sure the forward/reverse reads end with `_1` and `_2` (followed by `.format`, see -f, `.gz` optional), otherwise they will not be considered as a single sample. Example for fasta format files (`-f fa`):
+```
+STAS
+   ├── STAS.fa
+   └── STAS.fa.gz
+SWHAS104
+   ├── SWHAS104_1.fa
+   └── SWHAS104_2.fa.gz
+```
+
 ### (optional) Customized database/structures
 To use customized databases (e.g. mobile genetic elements or heave metal resistant genes), you need to prepare two files:
 1. nucleotide sequences or amino acid (protein) sequences database (e.g. `database.fasta`)
