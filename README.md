@@ -62,14 +62,14 @@ For example, `normalized_16S.type` means:
 
 ## Notes
 ### (optional) Single/Paired end files
-If you use paired-end files, please make sure the forward/reverse reads end with `_1` and `_2` (followed by `.format`, see -f, `.gz` optional), otherwise they will not be considered as a single sample. Example for fasta format files (`-f fa`):
+If you use paired-end files, please make sure the forward/reverse reads end with `_1` and `_2` or `_R1` and `_R2` (followed by `.format`, see -f, `.gz` optional), otherwise they will not be considered as a single sample. Example for fasta format files (`-f fa`):
 ```
 STAS
    ├── STAS_1.fa
    └── STAS_2.fa.gz
 SWHAS104
-   ├── SWHAS104_1.fa
-   └── SWHAS104_2.fa.gz
+   ├── SWHAS104_R1.fa
+   └── SWHAS104_R2.fa.gz
 ```
 
 ### (optional) Customized database/structures

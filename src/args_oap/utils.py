@@ -8,7 +8,7 @@ from .settings import logger
 
 def get_filename(file, format, drop=False):
     if drop:
-        return re.sub(rf'(_1|_2)?\.{format}(.gz)?$','',os.path.basename(file))
+        return re.sub(rf'(_R1|_R2|_1|_2)?\.{format}(.gz)?$','',os.path.basename(file))
     else:
         return re.sub(rf'\.{format}(.gz)?$','',os.path.basename(file))
         
