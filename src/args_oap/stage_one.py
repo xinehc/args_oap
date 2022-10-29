@@ -189,13 +189,13 @@ class StageOne:
                 ncell=self.count_cells(file)
                 metadata.append([nread, n16S, ncell, get_filename(file, self.format, drop=True)])
 
+            if not self.keep:
+                for tmp in glob(os.path.join(self.outdir, '*.tmp')):
+                    os.remove(tmp)
+                    
         if metadata:
             pd.DataFrame(metadata, columns=['nRead','n16S','nCell','Sample']).groupby('Sample').sum().to_csv(
                 self._metadata, sep='\t')
-
-        if not self.keep:
-            for tmp in glob(os.path.join(self.outdir, '*.tmp')):
-                os.remove(tmp)
 
         logger.info('Finished.')
 
