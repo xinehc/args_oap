@@ -6,6 +6,7 @@ import pandas as pd
 from glob import glob
 from .utils import *
 from .settings import logger, settings
+from .make_db import make_db
 
 class StageOne:
     def __init__(self, options):
