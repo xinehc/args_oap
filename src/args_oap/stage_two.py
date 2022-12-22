@@ -153,11 +153,11 @@ class StageTwo:
             logger.critical('No target sequence remained after merging structure files, no further normalization will be made.')
             sys.exit(2)
 
-        result['scov'] = result['scov'] * result['count']
+        result['copy'] = result['scov'] * result['count']
         result['rpk'] = result['count']/ (result['slen'] / 1000)
 
         for level in levels:
-            for measure, normalizer, name in zip(['scov', 'scov', 'count', 'rpk', 'rpk'], 
+            for measure, normalizer, name in zip(['copy', 'copy', 'count', 'rpk', 'rpk'], 
                                                  ['nCell', 'n16S', 'nRead', 'nRead', 'nRead'],
                                                  ['normalized_cell', 'normalized_16S', 'ppm', 'rpkm', 'tpm']):
 

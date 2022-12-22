@@ -28,20 +28,24 @@ def buffer_count(file):
     
     buf = read_f(buf_size)
     while buf:
-        nlines += buf.count(char)
+        nlines += buf.count('\n')
         buf = read_f(buf_size)
 
     f.close()
-    return nlines
+    if char == '>':
+        return int(nlines/2)
+    elif char =='@':
+        return int(nlines/4)
+    else:
+        logger.critical('Unrecognized file format <{}>. Only fasta or fastq supported.'.format(file))
+        sys.exit(2)
 
 def simple_count(file):
     nbps = 0
     nlines = 0
     f = open(file)
 
-    char = f.read(1) # get first character, > or @
-    f.seek(0) # roll back
-
+    char = '>'
     record = False
     for line in f:
         if line[0] == char:
