@@ -1,4 +1,4 @@
-# ARGs_OAP v3.2
+# ARGs_OAP v3.2.1
 This repository was created by Xiaole Yin (_xiaole99_) and is currently maintained by Xi Chen (_xinhec_). The goal is to make args_oap faster, and easier to run. 
 
 If you have any questions, please create an [issue](https://github.com/xinehc/args_oap/issues/new/choose), or contact Xiaole Yin ([yinlele99@gmail.com](yinlele99@gmail.com)).
@@ -132,6 +132,10 @@ After a while or so, you will notice that their are four files generated for you
 There are some questions raised by users, please refer to the [FAQ](https://github.com/biofuture/Ublastx_stageone/wiki/FAQ) for details. To run ARG OAP locally, users should download the source code into local computer system (Unix/Linux). Users can upload the generated files for stage two onto our Galaxy analysis platform (http://smile.hku.hk/SARGs) or use the local version of stage two script.
 
 ## Changes log
+#### Version 3.2.1 (22. December, 2022)
++ Fix fastq reading bug.
++ Rename `scov` to `copy` in output files.
+
 #### Version 3.2 (16. October, 2022)
 + Simplify interface.
 + Remove dependencies on manually entered `metadata.txt`.
