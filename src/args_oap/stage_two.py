@@ -49,7 +49,7 @@ class StageTwo:
                 os.remove(self._blastout)
 
         ## metadata if zero entries then cannot normalise
-        self.metadata = pd.read_table(self._metadata, index_col='Sample')
+        self.metadata = pd.read_table(self._metadata, index_col='Sample', dtype={'Sample':str})
         if (self.metadata[['nRead', 'n16S', 'nCell']]==0).any(axis=None):
             logger.warning('Found zero reads/16s/cells in some samples in metadata file <{}>. These samples will be ignored.'.format(self._metadata))
             self.metadata = self.metadata[~(self.metadata==0).any(axis=1)]
