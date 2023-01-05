@@ -140,7 +140,7 @@ class StageTwo:
         df = df.sort_values(['qseqid', 'evalue', 'bitscore', 'length'], ascending=[True, True, False, False])
         df = df.drop_duplicates(subset='qseqid', keep='first')
         
-        df['Sample'] = df['qseqid'].str.rsplit(pat='@', n=2).str.get(0).str.replace('_[12]$','', regex=True)
+        df['Sample'] = df['qseqid'].str.rsplit(pat='@', n=2).str.get(0).str.replace('_R?[12]$','', regex=True)
         df['scov'] = df['length'] / df['slen']
 
         ## merge blastout with metadata and structure
