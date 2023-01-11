@@ -132,6 +132,9 @@ After a while or so, you will notice that their are four files generated for you
 There are some questions raised by users, please refer to the [FAQ](https://github.com/biofuture/Ublastx_stageone/wiki/FAQ) for details. To run ARG OAP locally, users should download the source code into local computer system (Unix/Linux). Users can upload the generated files for stage two onto our Galaxy analysis platform (http://smile.hku.hk/SARGs) or use the local version of stage two script.
 
 ## Changes log
+#### Version 3.2.2 (11. January, 2023)
++ Fix naming issue https://github.com/xinehc/args_oap/issues/15.
+
 #### Version 3.2.1 (22. December, 2022)
 + Fix fastq reading bug.
 + Rename `scov` to `copy` in output files.
