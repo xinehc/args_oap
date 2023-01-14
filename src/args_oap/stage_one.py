@@ -5,7 +5,7 @@ import pandas as pd
 
 from glob import glob
 from .utils import *
-from .settings import logger, settings
+from .settings import settings
 from .make_db import make_db
 
 class StageOne:
@@ -20,23 +20,23 @@ class StageOne:
 
         ## if indir does not exist
         if not os.path.isdir(self.indir):
-            logger.critical('Input folder <{}> does not exist. Please check input folder (-i/--indir).'.format(self.indir))
-            sys.exit(2)
+            self.logger.critical('Input folder <{}> does not exist. Please check input folder (-i/--indir).'.format(self.indir))
+            raise RuntimeError()
         else:
             ## if glob no files in indir
             if len(self.files)==0:
-                logger.critical('No <*.{}> or <*.{}.gz> file found in input folder <{}>. Please check input folder (-i/--indir) or format (-f/--format).'.format(self.format, self.format, self.indir))
-                sys.exit(2)
+                self.logger.critical('No <*.{}> or <*.{}.gz> file found in input folder <{}>. Please check input folder (-i/--indir) or format (-f/--format).'.format(self.format, self.format, self.indir))
+                raise RuntimeError()
 
         ## if outdir same as indir
         if self.indir == self.outdir:
-            logger.critical('Folder for input/output cannot be identical. Please check input folder (-i/--indir) or output folder (-o/--outdir).')
-            sys.exit(2)
+            self.logger.critical('Folder for input/output cannot be identical. Please check input folder (-i/--indir) or output folder (-o/--outdir).')
+            raise RuntimeError()
 
         ## if extracted.fa or metadata.txt exists in outdir, raise warning that they will be overwritten
         os.makedirs(self.outdir, exist_ok=True)
         if os.path.isfile(self._extracted) or os.path.isfile(self._metadata):
-            logger.warning('Output folder <{}> contains <extracted.fa> and/or <metadata.txt>, they/it will be overwritten.'.format(self.outdir))
+            self.logger.warning('Output folder <{}> contains <extracted.fa> and/or <metadata.txt>, they/it will be overwritten.'.format(self.outdir))
             for file in [self._extracted, self._metadata]:
                 try:
                     os.remove(file)
@@ -45,11 +45,11 @@ class StageOne:
 
         ## first time running, build database manually
         if not os.path.isfile(settings._gg85+'.ndb') or not os.path.isfile(settings._ko30+'.pdb') or not os.path.isfile(settings._sarg+'.pdb'):
-            logger.info('Building databases ...')
-            logger.disabled = True # skip logging
+            self.logger.info('Building databases ...')
+            self.logger.disabled = True # skip logging
             for file in [settings._gg85, settings._ko30, settings._sarg]:
-                make_db(file)
-            logger.disabled = False
+                make_db(file, self.logger)
+            self.logger.disabled = False
 
         ## database check
         if os.path.isfile(self._db + '.pdb'):
@@ -57,8 +57,8 @@ class StageOne:
         elif os.path.isfile(self._db + '.ndb'):
             self._dbtype = 'nucl'
         else:
-            logger.critical('Cannot find database <{}>. Please run <make_db> first or check database (--database)'.format(self._db))
-            sys.exit(2)
+            self.logger.critical('Cannot find database <{}>. Please run <make_db> first or check database (--database)'.format(self._db))
+            raise RuntimeError()
 
     def count_16s(self, file):
         '''
@@ -93,12 +93,12 @@ class StageOne:
         ## process blastn results, store subject cover
         df = pd.read_table(_tmp_16s_txt, header=None, names=settings.cols)
         if len(df)==0:
-            logger.warning("No 16S-like sequences found in file <{}>.".format(file))
+            self.logger.warning("No 16S-like sequences found in file <{}>.".format(file))
             return 0
         else:
             df['scov'] = df['length'] / df['slen']
             if df['qseqid'].duplicated().sum()>0:
-                logger.warning('Duplicated qseqid in 16S.')
+                self.logger.warning('Duplicated qseqid in 16S.')
                 df = df[~df['qseqid'].duplicated()]
             return df['scov'].sum()
 
@@ -127,12 +127,12 @@ class StageOne:
         ## process blastx results, store subject coverage
         df = pd.read_table(_tmp_cells_txt, header=None, names=settings.cols)
         if len(df)==0:
-            logger.warning("No cells-like sequences found in file <{}>.".format(file))
+            self.logger.warning("No cells-like sequences found in file <{}>.".format(file))
             return 0
         else:
             df = pd.merge(df, self.ko30, on='sseqid', how='left')
             if df['qseqid'].duplicated().sum()>0:
-                logger.warning('Duplicated qseqid in cells {}.'.format(_tmp_cells_txt))
+                self.logger.warning('Duplicated qseqid in cells {}.'.format(_tmp_cells_txt))
                 df = df[~df['qseqid'].duplicated()]
             return df.groupby('ko30').apply(lambda x: sum(x['length'] / x['slen'])).sum()/30
 
@@ -169,7 +169,7 @@ class StageOne:
         with open(self._extracted, 'a') as f:
             df = pd.read_table(_tmp_seqs_txt, header=None, names=['qseqid', 'full_qseq'])
             if df['qseqid'].duplicated().sum()>0:
-                logger.warning('Duplicated qseqid in target sequences.')
+                self.logger.warning('Duplicated qseqid in target sequences.')
                 df = df[~df['qseqid'].duplicated()]
 
             cnt = 0
@@ -180,12 +180,12 @@ class StageOne:
     def run(self):
         metadata = []
         for i, file in enumerate(sorted(self.files)):
-            logger.info('Processing <{}> ({}/{}) ...'.format(file, i+1, len(self.files)))
+            self.logger.info('Processing <{}> ({}/{}) ...'.format(file, i+1, len(self.files)))
             self.extract_seqs(file)
 
             ## skip 16S/cells calculation if necessary
             if not self.skip:
-                nread=buffer_count(file)
+                nread=buffer_count(file, self.logger)
                 n16S=self.count_16s(file)
                 ncell=self.count_cells(file)
                 metadata.append([nread, n16S, ncell, get_filename(file, self.format, drop=True)])
@@ -198,7 +198,7 @@ class StageOne:
             pd.DataFrame(metadata, columns=['nRead','n16S','nCell','Sample']).groupby('Sample').sum().to_csv(
                 self._metadata, sep='\t')
 
-        logger.info('Finished.')
+        self.logger.info('Finished.')
 
 def run_stage_one(options):
     StageOne(vars(options)).run()

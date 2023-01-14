@@ -4,8 +4,6 @@ import sys
 import re
 import gzip 
 
-from .settings import logger
-
 def get_filename(file, format, drop=False):
     if drop:
         return re.sub(rf'(_R1|_R2|_1|_2)?\.{format}(.gz)?$','',os.path.basename(file))
@@ -13,7 +11,7 @@ def get_filename(file, format, drop=False):
         return re.sub(rf'\.{format}(.gz)?$','',os.path.basename(file))
         
 ## https://stackoverflow.com/a/850962
-def buffer_count(file):
+def buffer_count(file, logger):
     nlines = 0
     if re.search('.gz$', file):
         f = gzip.open(file, 'rt')

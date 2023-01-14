@@ -3,9 +3,9 @@ import subprocess
 import sys
 
 from .utils import *
-from .settings import logger, settings
+from .settings import settings
 
-def make_db(file):
+def make_db(file,logger):
     '''
     Make database. The type of the database will be determined based on diamond's return code.
     '''
@@ -19,12 +19,12 @@ def make_db(file):
     subp = subprocess.run(['diamond', 'makedb', '--in', file, '--db', file, '--quiet'], check=False, stderr=subprocess.PIPE)
     
     if subp.returncode == 1: # auto choose dbtype by checking diamond's return code
-        if subp.stderr == b'Error: The sequences are expected to be proteins but only contain DNA letters. Use the option --ignore-warnings to proceed.\n':
+        if subp.stderr == b'Error: The sequences are expected to be proteins but only contain DNA letters. Use the option --ignore-warnings to proceed.\n' or subp.stderr == b'Error: The sequences are expected to be proteins but only contain DNA letters. Use the option --ignore-warnings to proceed.\r\n':
             subprocess.run(['bwa', 'index', file], check=True, stderr=subprocess.DEVNULL)
             dbtype = 'nucl'
         else:
             logger.critical('Cannot build diamond database of <{}> ({}). Please check input file (-i/--infile).'.format(file, subp.stderr))
-            sys.exit(2)
+            raise RuntimeError('Cannot build diamond database of <{}> ({}). Please check input file (-i/--infile).'.format(file, subp.stderr))
     else:
         dbtype = 'prot'
 

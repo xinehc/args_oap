@@ -5,7 +5,7 @@ import pandas as pd
 
 from glob import glob
 from .utils import *
-from .settings import logger, settings
+from .settings import settings
 
 class StageTwo:
     def __init__(self, options):
@@ -16,18 +16,18 @@ class StageTwo:
 
         ## in indir does not exists
         if not os.path.isdir(self.indir):
-            logger.critical('Input folder <{}> does not exist. Please check input folder (-i/--indir).'.format(self.indir))
-            sys.exit(2)
+            self.logger.critical('Input folder <{}> does not exist. Please check input folder (-i/--indir).'.format(self.indir))
+            raise RuntimeError()
         else:
             ## if metadata.txt missing
             if not os.path.isfile(os.path.join(self.indir, 'metadata.txt')):
-                logger.critical('File "metadata.txt" does not exist in input folder <{}>. Please run <stage_one> first or check input folder (-i/--indir).'.format(self.indir))
-                sys.exit(2)
+                self.logger.critical('File "metadata.txt" does not exist in input folder <{}>. Please run <stage_one> first or check input folder (-i/--indir).'.format(self.indir))
+                raise RuntimeError()
 
             ## if extracted.fa missing
             if not os.path.isfile(os.path.join(self.indir, 'extracted.fa')):
-                logger.critical('File "extracted.fa" does not exist in input folder <{}>. Please run <stage_one> first or check input folder (-i/--indir).'.format(self.indir))
-                sys.exit(2)
+                self.logger.critical('File "extracted.fa" does not exist in input folder <{}>. Please run <stage_one> first or check input folder (-i/--indir).'.format(self.indir))
+                raise RuntimeError()
 
         ## if outdir is not given, use indir instead
         self.outdir = self.indir if self.outdir is None else self.outdir
@@ -37,26 +37,26 @@ class StageTwo:
         ## bypass blast
         if self.blastout is not None:
             if not os.path.isfile(self.blastout):
-                logger.critical('BLAST output file <{}> does not exist. Please check BLAST output file (--blastout)'.format(self.blastout))
+                self.logger.critical('BLAST output file <{}> does not exist. Please check BLAST output file (--blastout)'.format(self.blastout))
                 sys.exist(2)
             else:
-                logger.info('BLAST output file <{}> given, skip BLAST'.format(self.blastout))
+                self.logger.info('BLAST output file <{}> given, skip BLAST'.format(self.blastout))
                 self._blastout = self.blastout
         else:
             ## if blastout.txt exists in outdir, raise warning that it will be overwritten
             if os.path.isfile(self._blastout):
-                logger.warning('Output folder <{}> contains <blastout.txt>, it will be overwritten.'.format(self.outdir))
+                self.logger.warning('Output folder <{}> contains <blastout.txt>, it will be overwritten.'.format(self.outdir))
                 os.remove(self._blastout)
 
         ## metadata if zero entries then cannot normalise
         self.metadata = pd.read_table(self._metadata, index_col='Sample', dtype={'Sample':str})
         if (self.metadata[['nRead', 'n16S', 'nCell']]==0).any(axis=None):
-            logger.warning('Found zero reads/16s/cells in some samples in metadata file <{}>. These samples will be ignored.'.format(self._metadata))
+            self.logger.warning('Found zero reads/16s/cells in some samples in metadata file <{}>. These samples will be ignored.'.format(self._metadata))
             self.metadata = self.metadata[~(self.metadata==0).any(axis=1)]
 
         if len(self.metadata)==0:
-            logger.critical('No valid sample in metadata file <{}>, no further normalization will be made.'.format(self._metadata))
-            sys.exit(2)
+            self.logger.critical('No valid sample in metadata file <{}>, no further normalization will be made.'.format(self._metadata))
+            raise RuntimeError()
 
         ## database check
         if os.path.isfile(self._db + '.pdb'):
@@ -64,25 +64,25 @@ class StageTwo:
         elif os.path.isfile(self._db + '.ndb'):
             self._dbtype = 'nucl'
         else:
-            logger.critical('Cannot find database <{}>. Please run <make_db> first or check database (--database)'.format(self._db))
-            sys.exit(2)
+            self.logger.critical('Cannot find database <{}>. Please run <make_db> first or check database (--database)'.format(self._db))
+            raise RuntimeError()
 
         ## structures check
         for structure in [self.structure1, self.structure2, self.structure3]:
             if structure is not None and not os.path.isfile(structure):
-                logger.critical('Cannot load structure file <{}>. Please check structures (--strucutre1/--strucutre2/--strucutre3)'.format(structure))
-                sys.exit(2)
+                self.logger.critical('Cannot load structure file <{}>. Please check structures (--strucutre1/--strucutre2/--strucutre3)'.format(structure))
+                raise RuntimeError()
 
         structure_list = []
         if all([structure is None for structure in [self.structure1, self.structure2, self.structure3]]):
             if self.database is not None:
-                logger.warning('No structures given for customized database. Use default SARG structures')
+                self.logger.warning('No structures given for customized database. Use default SARG structures')
 
             for file, count in zip([settings._sarg_structure1, settings._sarg_structure2, settings._sarg_structure3], [1, 1/2, 1/3]):
                 structure_list.append(pd.read_table(file, dtype = str).assign(count = count))
         else:
             if self.database is None:
-                logger.warning('No database given for customized structures. Use default SARG database')
+                self.logger.warning('No database given for customized structures. Use default SARG database')
 
             for file, count in zip([self.structure1, self.structure2, self.structure3], [1, 1/2, 1/3]):
                 if file is not None:
@@ -93,13 +93,13 @@ class StageTwo:
         '''
         Extract target sequences using more stringent cutoffs & blast.
         '''
-        logger.info('Processing <{}> ...'.format(self._extracted))
+        self.logger.info('Processing <{}> ...'.format(self._extracted))
         nbps, nlines = simple_count(self._extracted)
         mt_mode = '1' if nbps / self.thread >= 2500000 else '0' 
         blast = 'blastx' if self._dbtype == 'prot' else 'blastn'
 
-        logger.info('Extracting target sequences using BLAST ...'.format(self._extracted))
-        logger.info('BLAST settings: {} bps, {} reads, {} threads, mt_mode {}.'.format(nbps, nlines, self.thread, mt_mode))
+        self.logger.info('Extracting target sequences using BLAST ...'.format(self._extracted))
+        self.logger.info('BLAST settings: {} bps, {} reads, {} threads, mt_mode {}.'.format(nbps, nlines, self.thread, mt_mode))
         
         cmd = [
             blast,
@@ -118,15 +118,15 @@ class StageTwo:
         '''
         Join extracted target sequences with metadata and structures. Aggregate according to levels (type/subtype/gene).
         '''
-        logger.info('Merging files ...')
+        self.logger.info('Merging files ...')
         df = pd.read_table(self._blastout, header=None, names=settings.cols)
         if len(df)==0:
-            logger.critical('No target sequence detected in <{}>, no further normalization will be made.'.format(self._extracted))
-            sys.exit(2)
+            self.logger.critical('No target sequence detected in <{}>, no further normalization will be made.'.format(self._extracted))
+            raise RuntimeError()
 
         if df.isnull().any(axis=None):
-            logger.critical('BLAST output file <{}> cannot be parsed. Please check BLAST output file (--blastout).'.format(self.blastout))
-            sys.exit(2)
+            self.logger.critical('BLAST output file <{}> cannot be parsed. Please check BLAST output file (--blastout).'.format(self.blastout))
+            raise RuntimeError()
 
         ## further filtering
         self.qcov = self.qcov/3/100 if self._dbtype == 'prot' else self.qcov/100 # for prot need to lower qcov as qlen is in bp
@@ -146,12 +146,12 @@ class StageTwo:
         ## merge blastout with metadata and structure
         levels = self.structures.columns[:-1]
         if not all(x in set(self.structures[levels[0]]) for x in df['sseqid'].unique()):
-            logger.warning('Not all extracted target sequences can be found in the structure file. Please check the database and/or the structure files.')
+            self.logger.warning('Not all extracted target sequences can be found in the structure file. Please check the database and/or the structure files.')
         
         result = pd.merge(df, self.structures, left_on = 'sseqid', right_on = levels[0], how = 'inner')
         if len(result)==0:
-            logger.critical('No target sequence remained after merging structure files, no further normalization will be made.')
-            sys.exit(2)
+            self.logger.critical('No target sequence remained after merging structure files, no further normalization will be made.')
+            raise RuntimeError()
 
         result['copy'] = result['scov'] * result['count']
         result['rpk'] = result['count']/ (result['slen'] / 1000)
@@ -184,7 +184,7 @@ class StageTwo:
         if self.blastout is None:
             self.extract_seqs()
         self.merge_files()
-        logger.info('Finished.')
+        self.logger.info('Finished.')
 
 def run_stage_two(options):
     StageTwo(vars(options)).run()
