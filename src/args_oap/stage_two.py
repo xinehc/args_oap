@@ -112,7 +112,7 @@ class StageTwo:
             '-num_threads', str(self.thread),
             '-mt_mode', mt_mode
             ]
-        subprocess.run(cmd, check=True)
+        subprocess.run(cmd, check=True, creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
 
     def merge_files(self):
         '''

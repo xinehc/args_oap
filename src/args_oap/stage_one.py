@@ -69,11 +69,11 @@ class StageOne:
         _tmp_16s_txt = os.path.join(self.outdir, filename + '.16s.txt.tmp')
 
         ## pre-filtering using bwa
-        subp = subprocess.run(['bwa', 'mem', '-t', str(self.thread), settings._gg85, file], check=True, capture_output=True)
+        subp = subprocess.run(['bwa', 'mem', '-t', str(self.thread), settings._gg85, file], check=True, capture_output=True, creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
 
         ## convert sam to fasta for later usage, note that reads can be duplicated
         with open(_tmp_16s_fa, 'w') as f:
-            subprocess.run(['samtools', 'fasta', '-F4', '-F0x900', '-'], check=True, input=subp.stdout, stdout=f, stderr=subprocess.DEVNULL)
+            subprocess.run(['samtools', 'fasta', '-F4', '-F0x900', '-'], check=True, input=subp.stdout, stdout=f, stderr=subprocess.DEVNULL, creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
 
         ## post-filter using blastn
         ## switch mt_mode if too little queries or too many threads, blast raises error if <2,500,000 bases per thread
@@ -88,7 +88,7 @@ class StageOne:
             '-max_hsps', '1', 
             '-max_target_seqs', '1',
             '-mt_mode', mt_mode, 
-            '-num_threads', str(self.thread)], check=True, stderr=subprocess.DEVNULL)
+            '-num_threads', str(self.thread)], check=True, stderr=subprocess.DEVNULL, creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
 
         ## process blastn results, store subject cover
         df = pd.read_table(_tmp_16s_txt, header=None, names=settings.cols)
@@ -122,7 +122,7 @@ class StageOne:
             '--max-hsps', '1',
             '--max-target-seqs', '1', 
             '--threads', str(self.thread), 
-            '--quiet'], check=True)
+            '--quiet'], check=True, creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
 
         ## process blastx results, store subject coverage
         df = pd.read_table(_tmp_cells_txt, header=None, names=settings.cols)
@@ -156,14 +156,14 @@ class StageOne:
                 '--query-cover', '15', 
                 '--max-hsps', '1',
                 '--max-target-seqs', '1', 
-                '--threads', str(self.thread), '--quiet'], check=True)
+                '--threads', str(self.thread), '--quiet'], check=True, creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
         else:
-            subp = subprocess.run(['bwa', 'mem', '-t', str(self.thread), self._db, file], check=True, capture_output=True)
-            subsubp = subprocess.run(['samtools', 'fasta', '-F4', '-F0x900', '-'], check=True, capture_output=True, input=subp.stdout)
+            subp = subprocess.run(['bwa', 'mem', '-t', str(self.thread), self._db, file], check=True, capture_output=True, creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
+            subsubp = subprocess.run(['samtools', 'fasta', '-F4', '-F0x900', '-'], check=True, capture_output=True, input=subp.stdout, creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
 
             ## convert sam to tab for later usage
             with open(_tmp_seqs_txt, 'w') as f:
-                subprocess.run(['awk', 'BEGIN{RS=">";OFS="\t"}NR>1{print "#"$1,$2}'], check=True, input=subsubp.stdout, stdout=f)
+                subprocess.run(['awk', 'BEGIN{RS=">";OFS="\t"}NR>1{print "#"$1,$2}'], check=True, input=subsubp.stdout, stdout=f, creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
 
         ## give a new header for each target sequences, merge all sequences to a single file
         with open(self._extracted, 'a') as f:
