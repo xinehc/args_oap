@@ -6,6 +6,7 @@ import pandas as pd
 from glob import glob
 from .utils import *
 from .settings import settings
+from .make_db import make_db
 
 class StageTwo:
     def __init__(self, options):
@@ -57,6 +58,14 @@ class StageTwo:
         if len(self.metadata)==0:
             self.logger.critical('No valid sample in metadata file <{}>, no further normalization will be made.'.format(self._metadata))
             raise RuntimeError()
+
+        ## first time running, build database manually
+        if not os.path.isfile(settings._gg85+'.ndb') or not os.path.isfile(settings._ko30+'.pdb') or not os.path.isfile(settings._sarg+'.pdb'):
+            self.logger.info('Building databases ...')
+            self.logger.disabled = True # skip logging
+            for file in [settings._gg85, settings._ko30, settings._sarg]:
+                make_db(file, self.logger)
+            self.logger.disabled = False
 
         ## database check
         if os.path.isfile(self._db + '.pdb'):
