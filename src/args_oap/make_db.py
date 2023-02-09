@@ -28,7 +28,7 @@ def make_db(file,logger):
     else:
         dbtype = 'prot'
 
-    subprocess.run(['makeblastdb', '-in', file, '-dbtype', dbtype, '-out', file], check=True, stdout=subprocess.DEVNULL, creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
+    subprocess.run(['makeblastdb', '-in', os.path.basename(file), '-dbtype', dbtype, '-out', os.path.basename(file)], cwd=os.path.dirname(file), check=True, stdout=subprocess.DEVNULL, creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
     logger.info('Finished.')
 
 def run_make_db(options):

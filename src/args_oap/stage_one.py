@@ -80,7 +80,7 @@ class StageOne:
         mt_mode = '1' if simple_count(_tmp_16s_fa)[0] / self.thread >= 2500000 else '0' 
         subprocess.run([
             'blastn', 
-            '-db', settings._gg85, 
+            '-db', os.path.basename(settings._gg85), 
             '-query', _tmp_16s_fa, 
             '-out', _tmp_16s_txt, 
             '-outfmt', ' '.join(['6']+settings.cols),
@@ -88,7 +88,7 @@ class StageOne:
             '-max_hsps', '1', 
             '-max_target_seqs', '1',
             '-mt_mode', mt_mode, 
-            '-num_threads', str(self.thread)], check=True, stderr=subprocess.DEVNULL, creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
+            '-num_threads', str(self.thread)], check=True, cwd = os.path.dirname(settings._gg85), stderr=subprocess.DEVNULL, creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
 
         ## process blastn results, store subject cover
         df = pd.read_table(_tmp_16s_txt, header=None, names=settings.cols)
@@ -112,7 +112,7 @@ class StageOne:
         ## filter using diamond
         subprocess.run([
             'diamond', 'blastx', 
-            '--db', settings._ko30 + '.dmnd', 
+            '--db', os.path.basename(settings._ko30 + '.dmnd'), 
             '--query', file, 
             '--out', _tmp_cells_txt, 
             '--outfmt', '6'] + settings.cols + [
@@ -122,7 +122,7 @@ class StageOne:
             '--max-hsps', '1',
             '--max-target-seqs', '1', 
             '--threads', str(self.thread), 
-            '--quiet'], check=True, creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
+            '--quiet'], check=True, cwd=os.path.dirname(settings._ko30 + '.dmnd'), creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
 
         ## process blastx results, store subject coverage
         df = pd.read_table(_tmp_cells_txt, header=None, names=settings.cols)
@@ -147,7 +147,7 @@ class StageOne:
         if self._dbtype == 'prot':
             subprocess.run([
                 'diamond', 'blastx', 
-                '--db', self._db + '.dmnd', 
+                '--db', os.path.basename(self._db + '.dmnd'), 
                 '--query', file, 
                 '--out', _tmp_seqs_txt, 
                 '--outfmt', '6', 'qseqid', 'full_qseq', 
@@ -156,7 +156,7 @@ class StageOne:
                 '--query-cover', '15', 
                 '--max-hsps', '1',
                 '--max-target-seqs', '1', 
-                '--threads', str(self.thread), '--quiet'], check=True, creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
+                '--threads', str(self.thread), '--quiet'], check=True,cwd=os.path.dirname(self._db + '.dmnd'), creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
         else:
             subp = subprocess.run(['bwa', 'mem', '-t', str(self.thread), self._db, file], check=True, capture_output=True, creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
             subsubp = subprocess.run(['samtools', 'fasta', '-F4', '-F0x900', '-'], check=True, capture_output=True, input=subp.stdout, creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)

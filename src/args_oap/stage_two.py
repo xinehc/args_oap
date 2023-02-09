@@ -112,7 +112,7 @@ class StageTwo:
         
         cmd = [
             blast,
-            '-db', self._db,
+            '-db', os.path.basename(self._db),
             '-query', self._extracted,
             '-out', self._blastout,
             '-outfmt', ' '.join(['6']+settings.cols),
@@ -121,7 +121,7 @@ class StageTwo:
             '-num_threads', str(self.thread),
             '-mt_mode', mt_mode
             ]
-        subprocess.run(cmd, check=True, creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
+        subprocess.run(cmd, check=True, cwd=os.path.dirname(self._db), creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
 
     def merge_files(self):
         '''
