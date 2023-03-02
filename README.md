@@ -3,7 +3,7 @@ This repository was created by Xiaole Yin (_xiaole99_) and is currently maintain
 
 If you have any questions, please create an [issue](https://github.com/xinehc/args_oap/issues/new/choose), or contact Xiaole Yin ([yinlele99@gmail.com](yinlele99@gmail.com)).
 
-More about the SARG database: [https://smile.hku.hk/pipeline/#/Indexing](https://smile.hku.hk/pipeline/#/Indexing).
+More about the SARG database: [https://smile.hku.hk/ARGs/Indexing/tree](https://smile.hku.hk/ARGs/Indexing/tree).
 
 ## Installation
 Conda (macOS/Linux):
