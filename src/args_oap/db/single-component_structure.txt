@@ -1,4 +1,5 @@
 gene	subtype	type
+capO	capO	chloramphenicol
 L06156.1.gene1.p01	aminoglycoside__AAC(2')-Ia	aminoglycoside
 U41471.1.gene1.p01	aminoglycoside__AAC(2')-Ib	aminoglycoside
 YP_001848841	aminoglycoside__AAC(2')-Ic	aminoglycoside
