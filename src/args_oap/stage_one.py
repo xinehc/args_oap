@@ -67,13 +67,14 @@ class StageOne:
         filename = get_filename(file, self.format)
         _tmp_16s_fa = os.path.join(self.outdir, filename + '.16s.fa.tmp')
         _tmp_16s_txt = os.path.join(self.outdir, filename + '.16s.txt.tmp')
+        _tmp_16s_sam = os.path.join(self.outdir, filename + '.16s.sam.tmp')
 
         ## pre-filtering using bwa
-        subp = subprocess.run(['bwa', 'mem', '-t', str(self.thread), settings._gg85, file], check=True, capture_output=True)
+        subprocess.run(['bwa', 'mem', '-t', str(self.thread), '-o', _tmp_16s_sam, settings._gg85, file], check=True, stderr=subprocess.DEVNULL)
 
         ## convert sam to fasta for later usage, note that reads can be duplicated
         with open(_tmp_16s_fa, 'w') as f:
-            subprocess.run(['samtools', 'fasta', '-F4', '-F0x900', '-'], check=True, input=subp.stdout, stdout=f, stderr=subprocess.DEVNULL)
+            subprocess.run(['samtools', 'fasta', '-F4', '-F0x900', _tmp_16s_sam], check=True, stderr=subprocess.DEVNULL, stdout=f)
 
         ## post-filter using blastn
         ## switch mt_mode if too little queries or too many threads, blast raises error if <2,500,000 bases per thread
@@ -158,12 +159,17 @@ class StageOne:
                 '--max-target-seqs', '1', 
                 '--threads', str(self.thread), '--quiet'], check=True)
         else:
-            subp = subprocess.run(['bwa', 'mem', '-t', str(self.thread), self._db, file], check=True, capture_output=True)
-            subsubp = subprocess.run(['samtools', 'fasta', '-F4', '-F0x900', '-'], check=True, capture_output=True, input=subp.stdout)
+            _tmp_seqs_sam = os.path.join(self.outdir, filename + '.seqs.sam.tmp')
+            _tmp_seqs_fa = os.path.join(self.outdir, filename + '.seqs.fa.tmp')
+
+            subprocess.run(['bwa', 'mem', '-t', str(self.thread), '-o', _tmp_seqs_sam, self._db, file], check=True, stderr=subprocess.DEVNULL)
+
+            with open(_tmp_seqs_fa, 'w') as f:
+                subprocess.run(['samtools', 'fasta', '-F4', '-F0x900', _tmp_seqs_sam], check=True, stderr=subprocess.DEVNULL, stdout=f)
 
             ## convert sam to tab for later usage
             with open(_tmp_seqs_txt, 'w') as f:
-                subprocess.run(['awk', 'BEGIN{RS=">";OFS="\t"}NR>1{print "#"$1,$2}'], check=True, input=subsubp.stdout, stdout=f)
+                subprocess.run(['awk', 'BEGIN{RS=">";OFS="\t"}NR>1{print "#"$1,$2}', _tmp_seqs_fa], check=True, stdout=f)
 
         ## give a new header for each target sequences, merge all sequences to a single file
         with open(self._extracted, 'a') as f:
