@@ -119,7 +119,7 @@ class StageTwo:
         Join extracted target sequences with metadata and structures. Aggregate according to levels (type/subtype/gene).
         '''
         logger.info('Merging files ...')
-        df = pd.read_table(self._blastout, header=None, names=settings.cols)
+        df = pd.read_table(self._blastout, header=None, names=settings.cols, dtype={'sseqid':str})
         if len(df)==0:
             logger.critical('No target sequence detected in <{}>, no further normalization will be made.'.format(self._extracted))
             sys.exit(2)
