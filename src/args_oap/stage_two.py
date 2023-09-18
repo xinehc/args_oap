@@ -156,6 +156,8 @@ class StageTwo:
         result['copy'] = result['scov'] * result['count']
         result['rpk'] = result['count']/ (result['slen'] / 1000)
 
+        result.to_csv(os.path.join(self.outdir, 'blastout.filtered.txt'), sep ='\t', index=False)
+
         for level in levels:
             for measure, normalizer, name in zip(['copy', 'copy', 'count', 'rpk', 'rpk'], 
                                                  ['nCell', 'n16S', 'nRead', 'nRead', 'nRead'],
