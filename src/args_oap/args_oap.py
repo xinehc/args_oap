@@ -24,6 +24,7 @@ def parse_stage_one(parser):
     optional.add_argument('--id', metavar='FLOAT', help='Identity cutoff (in percentage) for Essential Single Copy Marker Genes. [45]', default=45, type=float)
     optional.add_argument('--qcov', metavar='FLOAT', help='Query cover cutoff (in percentage) for Essential Single Copy Marker Genes. [0]', default=0, type=float)
     optional.add_argument('--skip', help='Skip cell number and 16S calculation.', action='store_true')
+    optional.add_argument('--resume', help='Resume calculation.', action='store_true')
     optional.add_argument('--keep', help='Keep all temporary files (*.tmp) in the output folder (--outdir).', action='store_true')
 
     database.add_argument('--database', metavar='FILE', help='Customized database (indexed) other than SARG. [None]', default=None)

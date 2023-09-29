@@ -69,27 +69,30 @@ class StageOne:
         _tmp_16s_txt = os.path.join(self.outdir, filename + '.16s.txt.tmp')
         _tmp_16s_sam = os.path.join(self.outdir, filename + '.16s.sam.tmp')
 
-        ## pre-filtering using bwa
-        subprocess.run(['bwa', 'mem', '-t', str(self.thread), '-o', _tmp_16s_sam, settings._gg85, file], check=True, stderr=subprocess.DEVNULL)
+        if not (self.resume and os.path.isfile(os.path.join(self.outdir, filename + '.cells.txt.tmp'))):
+            ## pre-filtering using bwa
+            subprocess.run(['bwa', 'mem', '-t', str(self.thread), '-o', _tmp_16s_sam, settings._gg85, file], check=True, stderr=subprocess.DEVNULL)
 
-        ## convert sam to fasta for later usage, note that reads can be duplicated
-        with open(_tmp_16s_fa, 'w') as f:
-            subprocess.run(['samtools', 'fasta', '-F4', '-F0x900', _tmp_16s_sam], check=True, stderr=subprocess.DEVNULL, stdout=f)
+            ## convert sam to fasta for later usage, note that reads can be duplicated
+            with open(_tmp_16s_fa, 'w') as f:
+                subprocess.run(['samtools', 'fasta', '-F4', '-F0x900', _tmp_16s_sam], check=True, stderr=subprocess.DEVNULL, stdout=f)
 
-        ## post-filter using blastn
-        ## switch mt_mode if too little queries or too many threads, blast raises error if <2,500,000 bases per thread
-        mt_mode = '1' if simple_count(_tmp_16s_fa)[0] / self.thread >= 2500000 else '0' 
-        subprocess.run([
-            'blastn', 
-            '-db', settings._gg85, 
-            '-query', _tmp_16s_fa, 
-            '-out', _tmp_16s_txt, 
-            '-outfmt', ' '.join(['6']+settings.cols),
-            '-evalue', str(self.e1), 
-            '-max_hsps', '1', 
-            '-max_target_seqs', '1',
-            '-mt_mode', mt_mode, 
-            '-num_threads', str(self.thread)], check=True, stderr=subprocess.DEVNULL)
+            ## post-filter using blastn
+            ## switch mt_mode if too little queries or too many threads, blast raises error if <2,500,000 bases per thread
+            mt_mode = '1' if simple_count(_tmp_16s_fa)[0] / self.thread >= 2500000 else '0' 
+            subprocess.run([
+                'blastn', 
+                '-db', settings._gg85, 
+                '-query', _tmp_16s_fa, 
+                '-out', _tmp_16s_txt, 
+                '-outfmt', ' '.join(['6']+settings.cols),
+                '-evalue', str(self.e1), 
+                '-max_hsps', '1', 
+                '-max_target_seqs', '1',
+                '-mt_mode', mt_mode, 
+                '-num_threads', str(self.thread)], check=True, stderr=subprocess.DEVNULL)
+        else:
+            logger.info('Skip 16s calculation for <{}>'.format(filename))
 
         ## process blastn results, store subject cover
         df = pd.read_table(_tmp_16s_txt, header=None, names=settings.cols)
@@ -144,32 +147,35 @@ class StageOne:
         filename = get_filename(file, self.format)
         _tmp_seqs_txt = os.path.join(self.outdir, filename + '.seqs.txt.tmp')
 
-        ## diamond or bwa
-        if self._dbtype == 'prot':
-            subprocess.run([
-                'diamond', 'blastx', 
-                '--db', self._db + '.dmnd', 
-                '--query', file, 
-                '--out', _tmp_seqs_txt, 
-                '--outfmt', '6', 'qseqid', 'full_qseq', 
-                '--evalue', '10', 
-                '--id', '60', 
-                '--query-cover', '15', 
-                '--max-hsps', '1',
-                '--max-target-seqs', '1', 
-                '--threads', str(self.thread), '--quiet'], check=True)
+        if not (self.resume and os.path.isfile(os.path.join(self.outdir, filename + '.16s.txt.tmp'))):
+            ## diamond or bwa
+            if self._dbtype == 'prot':
+                subprocess.run([
+                    'diamond', 'blastx', 
+                    '--db', self._db + '.dmnd', 
+                    '--query', file, 
+                    '--out', _tmp_seqs_txt, 
+                    '--outfmt', '6', 'qseqid', 'full_qseq', 
+                    '--evalue', '10', 
+                    '--id', '60', 
+                    '--query-cover', '15', 
+                    '--max-hsps', '1',
+                    '--max-target-seqs', '1', 
+                    '--threads', str(self.thread), '--quiet'], check=True)
+            else:
+                _tmp_seqs_sam = os.path.join(self.outdir, filename + '.seqs.sam.tmp')
+                _tmp_seqs_fa = os.path.join(self.outdir, filename + '.seqs.fa.tmp')
+
+                subprocess.run(['bwa', 'mem', '-t', str(self.thread), '-o', _tmp_seqs_sam, self._db, file], check=True, stderr=subprocess.DEVNULL)
+
+                with open(_tmp_seqs_fa, 'w') as f:
+                    subprocess.run(['samtools', 'fasta', '-F4', '-F0x900', _tmp_seqs_sam], check=True, stderr=subprocess.DEVNULL, stdout=f)
+
+                ## convert sam to tab for later usage
+                with open(_tmp_seqs_txt, 'w') as f:
+                    subprocess.run(['awk', 'BEGIN{RS=">";OFS="\t"}NR>1{print "#"$1,$2}', _tmp_seqs_fa], check=True, stdout=f)
         else:
-            _tmp_seqs_sam = os.path.join(self.outdir, filename + '.seqs.sam.tmp')
-            _tmp_seqs_fa = os.path.join(self.outdir, filename + '.seqs.fa.tmp')
-
-            subprocess.run(['bwa', 'mem', '-t', str(self.thread), '-o', _tmp_seqs_sam, self._db, file], check=True, stderr=subprocess.DEVNULL)
-
-            with open(_tmp_seqs_fa, 'w') as f:
-                subprocess.run(['samtools', 'fasta', '-F4', '-F0x900', _tmp_seqs_sam], check=True, stderr=subprocess.DEVNULL, stdout=f)
-
-            ## convert sam to tab for later usage
-            with open(_tmp_seqs_txt, 'w') as f:
-                subprocess.run(['awk', 'BEGIN{RS=">";OFS="\t"}NR>1{print "#"$1,$2}', _tmp_seqs_fa], check=True, stdout=f)
+            logger.info('Skip sequence extraction for <{}>'.format(filename))
 
         ## give a new header for each target sequences, merge all sequences to a single file
         with open(self._extracted, 'a') as f:
