@@ -192,7 +192,7 @@ def parse_make_db(parser):
         '--infile',
         required=True,
         metavar='FILE',
-        help='Database FASTA file. Can be either "nucleotide" or "protein".')
+        help='Database FASTA file. Can be either nucleotide or protein.')
 
     parser_make_db.set_defaults(func=run_make_db)
 

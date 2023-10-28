@@ -1,4 +1,11 @@
 ## Changelog
+#### Version 3.2.4 (27. Oct, 2023)
++ Linting.
++ Add output `blastout.filtered.txt` and `extracted.filtered.fa`.
++ Skip invalid samples in `stage_one` instead of raise exceptions.
++ Fix a bug causing 16S calculation being slow and slightly overestimated.
++ Fix a bug about TPM normalization.
+
 #### Version 3.2.3 (26. June, 2023)
 + Add a gene capO
 + Reduce peak meamory usage for large files https://github.com/xinehc/args_oap/issues/29.

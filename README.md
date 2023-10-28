@@ -21,7 +21,7 @@ If your OS satisfies all the dependencies (`python>=3.7`, `diamond>=2.0.15`, `bw
 ```bash
 git clone https://github.com/xinehc/args_oap.git
 cd args_oap
-python setup.py install # use python3 if needed
+python setup.py install  # use python3 if needed
 ```
 
 ## Example
@@ -40,31 +40,33 @@ args_oap stage_two -i output -t 8
 
 After `stage_one`, a `metadata.txt` file can be found in `output`. It summarizes the estimated 16S and cell copy numbers in each sample, for example:
 
-|Sample  |nRead |n16S             |nCell             |
-|--------|------|-----------------|------------------|
-|STAS    |200000|8.229297879794053|3.145703856125799 |
-|SWHAS104|200000|7.009547807125172|3.5116647568418156|
+| sample   | nRead  | n16S              | nCell              |
+|----------|--------|-------------------|--------------------|
+| STAS     | 200000 | 8.229297879794053 | 3.1472376316269055 |
+| SWHAS104 | 200000 | 7.009547807125172 | 3.487830355315917  |
 
 After `stage_two`, the normalized ARGs copies per 16S/cells or hits per million reads will be shown in several `*_normalized_*.txt` files. 
-For example, `normalized_16S.type` means:
-+ `normalized_16S` - normalized against 16S rRNA copies
-+ `type` - Type of ARGs (the hierarchy in SARG is type -> subtype -> gene)
+For example, `normalized_cell.type` means:
++ `normalized_cell` - normalized against cell number
++ `type` - type of ARGs (the hierarchy in the SARG database is type -> subtype -> gene)
 
-|type                               |STAS                 |SWHAS104            |
-|-----------------------------------|---------------------|--------------------|
-|aminoglycoside                     |0.016202273302162947 |0.06914804847025294 |
-|bacitracin                         |0.014243756749154238 |0.0364784305175336  |
-|beta_lactam                        |0.0                  |0.07424208305458765 |
-|macrolide-lincosamide-streptogramin|0.0                  |0.011963015532727394|
-|multidrug                          |0.004952224304989356 |0.096443559902374   |
-|mupirocin                          |0.0029667248478081566|0.004557467877130284|
-|quinolone                          |0.14468645528642876  |0.04399873193528583 |
-|sulfonamide                        |0.013452071929840085 |0.06808763199694166 |
-|tetracycline                       |0.004659396079993178 |0.04969500656817937 |
+| type                                | STAS                 | SWHAS104             |
+|-------------------------------------|----------------------|----------------------|
+| aminoglycoside                      | 0.04236519416057223  | 0.1411521328969608   |
+| bacitracin                          | 0.03724412673456899  | 0.07331127852930945  |
+| beta_lactam                         | 0.0                  | 0.14920548807040623  |
+| macrolide-lincosamide-streptogramin | 0.0                  | 0.02404226144950743  |
+| multidrug                           | 0.012948920209830746 | 0.19382414709324317  |
+| mupirocin                           | 0.007757298735456341 | 0.009159215245515702 |
+| quinolone                           | 0.37832158835366747  | 0.08842494718334318  |
+| sulfonamide                         | 0.035174054192357015 | 0.1368367904789564   |
+| tetracycline                        | 0.012183242185747383 | 0.09987284037027115  |
+
+Output file `extracted.filtered.fa` contains all filtered ARG-like sequences after `stage_two`. `blastout.filtered.txt` is the metadata of these sequences.
 
 ## Notes
 ### (optional) Single/Paired end files
-If you use paired-end files, please make sure the forward/reverse reads end with `_1` and `_2` or `_R1` and `_R2` (followed by `.format`, see -f, `.gz` optional), otherwise they will not be considered as a single sample. Example for fasta format files (`-f fa`):
+If you use paired-end files, please make sure the forward/reverse reads end with `_1|_2`, `_R1|_R2` or `_fwd|_rev` (followed by `.format`, see -f, `.gz` optional), otherwise they will not be considered as a single sample. Example for fasta format files (`-f fa`):
 ```
 STAS
    ├── STAS_1.fa

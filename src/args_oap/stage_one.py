@@ -215,7 +215,7 @@ class StageOne:
                     ncell = self.count_cells(file)
                     metadata.append([nread, n16S, ncell, file.sample_name])
             except subprocess.CalledProcessError:
-                logger.warning(f'Something is wrong with <{file.file}>, pass.')
+                logger.warning(f'Something is wrong with <{file.file}>, skip.')
 
             if not self.keep:
                 for tmp in glob.glob(os.path.join(self.outdir, '*.tmp')):
