@@ -63,7 +63,8 @@ For example, `normalized_cell.type` means:
 | tetracycline                        | 0.012183242185747383 | 0.09987284037027115  |
 
 Output file `extracted.filtered.fa` contains all filtered ARG-like sequences after `stage_two`. `blastout.filtered.txt` is the metadata of these sequences.
-# Note: Before running ARGs-OAP, a de-contamination processes is recommended to secure clean prokaryotic reads. This includes the removal of genomic sequences from hosts (e.g., human), and from fungal sources. This step is critical to avoid potential biases in the calculation of cell numbers which relies on the identification of essential single copy marker genes.
+### De-contamination: 
+Before running ARGs-OAP, a de-contamination processes is recommended to secure clean prokaryotic reads. This includes the removal of genomic sequences from hosts (e.g., human), and from fungal sources. This step is critical to avoid potential biases in the calculation of cell numbers which relies on the identification of essential single copy marker genes.
 
 
 ## Notes
@@ -76,7 +77,7 @@ STAS
 SWHAS104
    ├── SWHAS104_R1.fa
    └── SWHAS104_R2.fa.gz
-```
+```   
 
 ### (optional) Customized database/structures
 To use customized databases (e.g. mobile genetic elements or heave metal resistant genes), you need to prepare two files:
