@@ -76,34 +76,35 @@ class StageOne:
         Count 16S (GreenGenes 16S rRNA Database 85%) copy number using bwa (pre-filtering) and blastn (post-filtering).
         '''
         ## pre-filtering using bwa
-        subprocess.run([
-            'bwa', 'mem',
-            '-t', str(self.thread),
-            '-o', file.tmp_16s_sam,
-            self.setting.gg85, file.file], check=True, stderr=subprocess.DEVNULL)
-
-        ## convert sam to fasta for later usage, note that reads can be duplicated
-        with open(file.tmp_16s_fa, 'w') as f:
+        if not os.path.isfile(file.tmp_16s_txt) and os.path.getsize(file.tmp_16s_txt) != 0:
             subprocess.run([
-                'samtools',
-                'fasta',
-                '-F', '2308',
-                file.tmp_16s_sam], check=True, stderr=subprocess.DEVNULL, stdout=f)
-
-        ## post-filter using blastn
-        ## switch mt_mode if too little queries or too many threads, blast raises error if <2,500,000 bases per thread
-        mt_mode = '1' if simple_count(file.tmp_16s_fa)[0] / self.thread >= 2500000 else '0'
-        subprocess.run([
-            'blastn',
-            '-db', self.setting.gg85,
-            '-query', file.tmp_16s_fa,
-            '-out', file.tmp_16s_txt,
-            '-outfmt', ' '.join(['6'] + self.setting.columns),
-            '-evalue', str(self.e1),
-            '-max_hsps', '1',
-            '-max_target_seqs', '1',
-            '-mt_mode', mt_mode,
-            '-num_threads', str(self.thread)], check=True, stderr=subprocess.DEVNULL)
+                'bwa', 'mem',
+                '-t', str(self.thread),
+                '-o', file.tmp_16s_sam,
+                self.setting.gg85, file.file], check=True, stderr=subprocess.DEVNULL)
+    
+            ## convert sam to fasta for later usage, note that reads can be duplicated
+            with open(file.tmp_16s_fa, 'w') as f:
+                subprocess.run([
+                    'samtools',
+                    'fasta',
+                    '-F', '2308',
+                    file.tmp_16s_sam], check=True, stderr=subprocess.DEVNULL, stdout=f)
+    
+            ## post-filter using blastn
+            ## switch mt_mode if too little queries or too many threads, blast raises error if <2,500,000 bases per thread
+            mt_mode = '1' if simple_count(file.tmp_16s_fa)[0] / self.thread >= 2500000 else '0'
+            subprocess.run([
+                'blastn',
+                '-db', self.setting.gg85,
+                '-query', file.tmp_16s_fa,
+                '-out', file.tmp_16s_txt,
+                '-outfmt', ' '.join(['6'] + self.setting.columns),
+                '-evalue', str(self.e1),
+                '-max_hsps', '1',
+                '-max_target_seqs', '1',
+                '-mt_mode', mt_mode,
+                '-num_threads', str(self.thread)], check=True, stderr=subprocess.DEVNULL)
 
         ## process blastn results, store subject cover
         df = pd.read_table(file.tmp_16s_txt, header=None, names=self.setting.columns)
@@ -121,19 +122,20 @@ class StageOne:
         Count Essential Single Copy Marker Genes (cell number) using diamond.
         '''
         ## filter using diamond
-        subprocess.run([
-            'diamond', 'blastx',
-            '--db', f'{self.setting.ko30}.dmnd',
-            '--query', file.file,
-            '--out', file.tmp_cells_txt,
-            '--outfmt', '6'] + self.setting.columns + [
-            '--evalue', str(self.e2),
-            '--id', str(self.id),
-            '--query-cover', str(self.qcov),
-            '--max-hsps', '1',
-            '--max-target-seqs', '1',
-            '--threads', str(self.thread),
-            '--quiet'], check=True, stderr=subprocess.DEVNULL)
+        if not os.path.isfile(file.tmp_cells_txt) and os.path.getsize(file.tmp_cells_txt) != 0:
+            subprocess.run([
+                'diamond', 'blastx',
+                '--db', f'{self.setting.ko30}.dmnd',
+                '--query', file.file,
+                '--out', file.tmp_cells_txt,
+                '--outfmt', '6'] + self.setting.columns + [
+                '--evalue', str(self.e2),
+                '--id', str(self.id),
+                '--query-cover', str(self.qcov),
+                '--max-hsps', '1',
+                '--max-target-seqs', '1',
+                '--threads', str(self.thread),
+                '--quiet'], check=True, stderr=subprocess.DEVNULL)
 
         ## process blastx results, store subject coverage
         df = pd.merge(pd.read_table(file.tmp_cells_txt, header=None, names=self.setting.columns), self.ko30, on='sseqid', how='left')
@@ -150,43 +152,44 @@ class StageOne:
         '''
         Prefilter ARGs, or other target sequences.
         '''
-        ## diamond or bwa
-        if self.dbtype == 'prot':
-            subprocess.run([
-                'diamond', 'blastx',
-                '--db', f'{self.db}.dmnd',
-                '--query', file.file,
-                '--out', file.tmp_seqs_txt,
-                '--outfmt', '6', 'qseqid', 'full_qseq',
-                '--evalue', '10',
-                '--id', '60',
-                '--query-cover', '15',
-                '--max-hsps', '1',
-                '--max-target-seqs', '1',
-                '--threads', str(self.thread),
-                '--quiet'], check=True, stderr=subprocess.DEVNULL)
-        else:
-            subprocess.run([
-                'bwa', 'mem',
-                '-t', str(self.thread),
-                '-o', file.tmp_seqs_sam,
-                self.db, file.file], check=True, stderr=subprocess.DEVNULL)
-
-            with open(file.tmp_seqs_fa, 'w') as f:
+        if not os.path.isfile(file.tmp_seqs_txt) and os.path.getsize(file.tmp_seqs_txt) != 0:
+            ## diamond or bwa
+            if self.dbtype == 'prot':
                 subprocess.run([
-                    'samtools',
-                    'fasta',
-                    '-F', '2308',
-                    file.tmp_seqs_sam], check=True, stderr=subprocess.DEVNULL, stdout=f)
-
-            ## convert fa to tab to make results consistent
-            with open(file.tmp_seqs_txt, 'w') as w:
-                with open(file.tmp_seqs_fa) as f:
-                    for line in f:
-                        if line[0] == '>':
-                            qseqid = line[1:].rstrip().split(' ')[0]
-                        else:
-                            w.write(f'{qseqid}\t{line}')
+                    'diamond', 'blastx',
+                    '--db', f'{self.db}.dmnd',
+                    '--query', file.file,
+                    '--out', file.tmp_seqs_txt,
+                    '--outfmt', '6', 'qseqid', 'full_qseq',
+                    '--evalue', '10',
+                    '--id', '60',
+                    '--query-cover', '15',
+                    '--max-hsps', '1',
+                    '--max-target-seqs', '1',
+                    '--threads', str(self.thread),
+                    '--quiet'], check=True, stderr=subprocess.DEVNULL)
+            else:
+                subprocess.run([
+                    'bwa', 'mem',
+                    '-t', str(self.thread),
+                    '-o', file.tmp_seqs_sam,
+                    self.db, file.file], check=True, stderr=subprocess.DEVNULL)
+    
+                with open(file.tmp_seqs_fa, 'w') as f:
+                    subprocess.run([
+                        'samtools',
+                        'fasta',
+                        '-F', '2308',
+                        file.tmp_seqs_sam], check=True, stderr=subprocess.DEVNULL, stdout=f)
+    
+                ## convert fa to tab to make results consistent
+                with open(file.tmp_seqs_txt, 'w') as w:
+                    with open(file.tmp_seqs_fa) as f:
+                        for line in f:
+                            if line[0] == '>':
+                                qseqid = line[1:].rstrip().split(' ')[0]
+                            else:
+                                w.write(f'{qseqid}\t{line}')
 
         ## give a new header for each target sequences, merge all sequences to a single file
         with open(self.setting.extracted, 'a') as f:
