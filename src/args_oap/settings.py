@@ -120,6 +120,17 @@ class Setting:
             return os.path.join(self.indir, 'metadata.txt')
 
     @property
+    def absolute_metadata(self) -> str:
+        if self.indir is None:
+            return os.path.join(self.outdir, 'absolute_quantification_metadata.txt')
+        else:
+            return os.path.join(self.indir, 'absolute_quantification_metadata.txt')
+
+    @property
+    def metadata_with_absolute_quantification(self) -> str:
+        return os.path.join(self.outdir, 'metadata_with_absolute_quantification.txt')
+
+    @property
     def blastout(self) -> str:
         return os.path.join(self.outdir, 'blastout.txt')
 

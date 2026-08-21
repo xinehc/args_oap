@@ -1,4 +1,7 @@
 ## Changelog
+#### Version 4.0.0 (21. Aug, 2026)
++ Absolute quantification.
+
 #### Version 3.2.4 (27. Oct, 2023)
 + Linting.
 + Add output `blastout.filtered.txt` and `extracted.filtered.fa`.

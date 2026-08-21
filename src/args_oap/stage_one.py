@@ -4,7 +4,7 @@ import sys
 import glob
 import pandas as pd
 
-from .utils import buffer_count, simple_count
+from .utils import buffer_count, nucleotide_count, simple_count
 from .settings import File, Setting, logger
 from .make_db import make_db
 
@@ -44,7 +44,14 @@ class StageOne:
         os.makedirs(self.outdir, exist_ok=True)
         if os.path.isfile(self.setting.extracted) or os.path.isfile(self.setting.metadata):
             logger.warning(f'Output folder <{self.outdir}> contains <extracted.fa> and/or <metadata.txt>, they/it will be overwritten.')
-            for file in [self.setting.extracted, self.setting.metadata]:
+            for file in [
+                self.setting.extracted,
+                self.setting.metadata,
+                self.setting.absolute_metadata,
+                self.setting.metadata_with_absolute_quantification,
+                os.path.join(self.outdir, '.absolute_quantification.tmp'),
+                os.path.join(self.outdir, 'absolute_metadata.txt')
+            ]:
                 try:
                     os.remove(file)
                 except OSError:
@@ -213,7 +220,8 @@ class StageOne:
                     nread = buffer_count(file.file)
                     n16S = self.count_16s(file)
                     ncell = self.count_cells(file)
-                    metadata.append([nread, n16S, ncell, file.sample_name])
+                    nucleotide = nucleotide_count(file.file)
+                    metadata.append([nread, nucleotide['A'], nucleotide['T'], nucleotide['C'], nucleotide['G'], n16S, ncell, file.sample_name])
             except subprocess.CalledProcessError:
                 logger.warning(f'Something is wrong with <{file.file}>, skip.')
 
@@ -221,7 +229,46 @@ class StageOne:
                 for tmp in glob.glob(os.path.join(self.outdir, '*.tmp')):
                     os.remove(tmp)
 
-        pd.DataFrame(metadata, columns=['nRead', 'n16S', 'nCell', 'sample']).groupby('sample').sum().to_csv(self.setting.metadata, sep='\t')
+        nucleotide_columns = ['An', 'Tn', 'Cn', 'Gn']
+        metadata = pd.DataFrame(metadata, columns=['nRead'] + nucleotide_columns + ['n16S', 'nCell', 'sample']).groupby('sample').sum()
+
+        ## optional metadata for absolute quantification
+        meta_columns = ['SampleVolume_mL', 'ElutionVolume_uL', 'DNAConcentration_ng/uL']
+        if self.absquantmeta is not None and os.path.isfile(self.absquantmeta):
+            sample_metadata = pd.read_table(self.absquantmeta, dtype={'sample': str})
+            required_columns = ['sample'] + meta_columns
+            invalid = []
+            if 'sample' not in sample_metadata.columns:
+                logger.warning(f'File <{self.absquantmeta}> has no sample column. Skip absolute quantification for all samples.')
+                sample_metadata = pd.DataFrame(columns=required_columns)
+            else:
+                for column in meta_columns:
+                    if column not in sample_metadata.columns:
+                        sample_metadata[column] = pd.NA
+                duplicated = sample_metadata.loc[sample_metadata['sample'].duplicated(), 'sample'].tolist()
+                if duplicated:
+                    logger.warning(f'Duplicated absolute-quantification metadata found for sample(s): {", ".join(duplicated)}. Use the first row.')
+                    sample_metadata = sample_metadata.drop_duplicates(subset='sample', keep='first')
+                sample_metadata[meta_columns] = sample_metadata[meta_columns].apply(pd.to_numeric, errors='coerce')
+                valid = sample_metadata[meta_columns].notnull().all(axis=1) & (sample_metadata[meta_columns] > 0).all(axis=1)
+                invalid = sample_metadata.loc[~valid, 'sample'].dropna().tolist()
+                if invalid:
+                    logger.warning(f'Invalid or incomplete absolute-quantification metadata for sample(s): {", ".join(invalid)}. Skip absolute quantification for them.')
+                sample_metadata = sample_metadata[valid]
+
+            absolute_metadata = metadata.reset_index().merge(sample_metadata[required_columns], on='sample', how='inner').set_index('sample')
+            missing = [sample for sample in metadata.index.difference(absolute_metadata.index) if sample not in invalid]
+            if missing:
+                logger.warning(f'No absolute-quantification metadata found for sample(s): {", ".join(missing)}. Absolute quantification will not be calculated for them.')
+            if len(absolute_metadata) > 0:
+                absolute_metadata[nucleotide_columns + meta_columns].to_csv(self.setting.absolute_metadata, sep='\t')
+        else:
+            if self.absquantmeta is not None:
+                logger.warning(f'Absolute-quantification metadata file <{self.absquantmeta}> does not exist. Skip absolute quantification.')
+
+        metadata = metadata.drop(columns=nucleotide_columns)
+
+        metadata.to_csv(self.setting.metadata, sep='\t')
         logger.info('Finished.')
 
 

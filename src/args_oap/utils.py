@@ -35,6 +35,36 @@ def buffer_count(file):
         sys.exit(2)
 
 
+def nucleotide_count(file):
+    '''
+    Count A/T/C/G nucleotides in a fasta/fastq file.
+    '''
+    if re.search('.gz$', file):
+        f = gzip.open(file, 'rt')
+    else:
+        f = open(file)
+
+    char = f.read(1)
+    f.seek(0)
+
+    if char == '>':
+        sequences = (line.rstrip().upper() for line in f if not line.startswith('>'))
+    elif char == '@':
+        sequences = (line.rstrip().upper() for i, line in enumerate(f) if i % 4 == 1)
+    else:
+        f.close()
+        logger.critical(f'Unrecognized file format <{file}>. Only fasta or fastq supported.')
+        sys.exit(2)
+
+    counts = {base: 0 for base in 'ATCG'}
+    for sequence in sequences:
+        for base in counts:
+            counts[base] += sequence.count(base)
+
+    f.close()
+    return counts
+
+
 def simple_count(file):
     '''
     Simple count bps of a file.

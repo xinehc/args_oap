@@ -82,6 +82,14 @@ def parse_stage_one(parser):
         action='store_true',
         help='Keep all temporary files (*.tmp) in output folder (--outdir).')
 
+    optional.add_argument(
+        '-m',
+        '--metaforabsolutequantification',
+        dest='absquantmeta',
+        metavar='FILE',
+        default='input/meta.txt',
+        help='Sample metadata for optional absolute quantification. If missing, absolute quantification is skipped. [input/meta.txt]')
+
     database.add_argument(
         '--database',
         metavar='FILE',

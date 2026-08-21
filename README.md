@@ -38,6 +38,18 @@ args_oap stage_one -i input -o output -f fa -t 8
 args_oap stage_two -i output -t 8
 ```
 
+For optional absolute quantification, add `input/meta.txt` (or use `-m FILE`) in this format:
+
+```
+sample	SampleVolume_mL	ElutionVolume_uL	DNAConcentration_ng/uL
+STAS	50	60	50
+SWHAS104	50	60	50
+```
+
+Missing files, samples, or valid positive values are skipped. Stage two adds
+`metadata_with_absolute_quantification.txt` and `absolute_quantification.{type,subtype,gene}.txt`
+in total ARG copies/mL; all original outputs are unchanged.
+
 After `stage_one`, a `metadata.txt` file can be found in `output`. It summarizes the estimated 16S and cell copy numbers in each sample, for example:
 
 | sample   | nRead  | n16S              | nCell              |
