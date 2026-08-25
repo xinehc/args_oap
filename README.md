@@ -1,8 +1,13 @@
-🎉 **ARGs-OAP v4.00 (Beta) is now available!**
+# 🎉 **ARGs-OAP v4.00 (Beta) is now available!**
 This beta release introduces a new **absolute quantification** function. By providing DNA concentration and sample mass information, users can estimate **absolute abundances directly from metagenomic sequencing data without the need for spike-ins or qPCR**.
+
 ➡️ [How to use the absolute quantification module](docs/absolute-quantification.md)
+
 For aboluste quantification, please refer to our paper: Yin, X., Yang, Y., Deng, Y., ... & Zhang, T. (**2022**). [An assessment of resistome and mobilome in wastewater treatment plants through temporal and spatial metagenomic analysis](https://doi.org/10.1016/j.watres.2021.117885). **Water Research**, 209, 117885.
+
 Please note that v4.00 does not include any database or pipeline changes. Further updates to the SARG database and pipeline itself are under development and will be released soon. 
+
+---
 
 # ARGs_OAP
 This repository was created by Xiaole Yin (_xiaole99_) and is currently maintained by Xi Chen (_xinhec_). The goal is to make args_oap faster, and easier to run. 
