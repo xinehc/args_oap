@@ -53,8 +53,9 @@ Run:
 ```bash
 # conda activate args_oap
 args_oap stage_one -i input -o output -f fa -t 8 -m input/meta.txt
-args_oap stage_two -i output -t 8 -m input/meta.txt
+args_oap stage_two -i output -t 8
 ```
+stage_two does not require the -m argument. Absolute quantification will be calculated automatically if the -m argument was provided in stage_one.
 
 Samples with missing input files, missing metadata, or invalid/non-positive metadata values will be skipped.
 
